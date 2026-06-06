@@ -1,0 +1,43 @@
+<div class="auth-wrapper">
+  <mat-card class="auth-card">
+    <mat-card-header>
+      <mat-card-title>Вход</mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      <form [formGroup]="form" (ngSubmit)="submit()">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Email</mat-label>
+          <input matInput type="email" formControlName="email" autocomplete="email">
+          @if (form.get('email')?.hasError('email')) {
+            <mat-error>Введите корректный email</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Пароль</mat-label>
+          <input matInput type="password" formControlName="password" autocomplete="current-password">
+          @if (form.get('password')?.hasError('required')) {
+            <mat-error>Введите пароль</mat-error>
+          }
+        </mat-form-field>
+
+        @if (error) {
+          <p class="error-msg">{{ error }}</p>
+        }
+
+        <button mat-flat-button type="submit" class="full-width" [disabled]="loading">
+          @if (loading) {
+            <mat-spinner diameter="20" />
+          } @else {
+            Войти
+          }
+        </button>
+      </form>
+    </mat-card-content>
+
+    <mat-card-footer>
+      <p class="footer-text">Нет аккаунта? <a routerLink="/register">Зарегистрироваться</a></p>
+    </mat-card-footer>
+  </mat-card>
+</div>
