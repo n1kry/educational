@@ -10,4 +10,5 @@ public class ProgressResponse {
     private int progressPercent;
     private List<Long> completedLessonIds;
     private List<Long> passedQuizIds;
+    private String completedAt;
 }

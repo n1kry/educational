@@ -34,14 +34,19 @@ public class ProgressService {
                 .findByStudentIdAndCourseId(student.getId(), courseId)
                 .stream().filter(QuizResult::isPassed).map(qr -> qr.getQuiz().getId()).toList();
 
-        int percent = courseProgressRepository
-                .findByStudentIdAndCourseId(student.getId(), courseId)
-                .map(CourseProgress::getProgressPercent).orElse(0);
+        CourseProgress cp = courseProgressRepository
+                .findByStudentIdAndCourseId(student.getId(), courseId).orElse(null);
+
+        int percent = cp != null ? cp.getProgressPercent() : 0;
+        String completedAt = (cp != null && cp.getCompletedAt() != null)
+                ? cp.getCompletedAt().toString()
+                : null;
 
         return ProgressResponse.builder()
                 .progressPercent(percent)
                 .completedLessonIds(completedLessonIds)
                 .passedQuizIds(passedQuizIds)
+                .completedAt(completedAt)
                 .build();
     }
 
@@ -105,6 +110,9 @@ public class ProgressService {
                 .findByStudentIdAndCourseId(student.getId(), courseId)
                 .orElse(CourseProgress.builder().student(student).course(course).build());
         cp.setProgressPercent(percent);
+        if (percent == 100 && cp.getCompletedAt() == null) {
+            cp.setCompletedAt(LocalDateTime.now());
+        }
         courseProgressRepository.save(cp);
     }
 

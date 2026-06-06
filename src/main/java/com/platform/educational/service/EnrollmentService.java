@@ -19,6 +19,8 @@ public class EnrollmentService {
     private final EnrollmentRepository enrollmentRepository;
     private final CourseRepository courseRepository;
     private final CourseProgressRepository courseProgressRepository;
+    private final LessonProgressRepository lessonProgressRepository;
+    private final QuizResultRepository quizResultRepository;
 
     @Transactional
     public void enroll(Long courseId, User student) {
@@ -36,23 +38,46 @@ public class EnrollmentService {
         courseProgressRepository.save(CourseProgress.builder()
                 .student(student)
                 .course(course)
-                .progressPercent(0)
                 .build());
+    }
+
+    @Transactional
+    public void unenroll(Long courseId, User student) {
+        Enrollment enrollment = enrollmentRepository
+                .findByStudentIdAndCourseId(student.getId(), courseId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Not enrolled"));
+
+        lessonProgressRepository.deleteAll(
+                lessonProgressRepository.findByStudentIdAndCourseId(student.getId(), courseId));
+        quizResultRepository.deleteAll(
+                quizResultRepository.findByStudentIdAndCourseId(student.getId(), courseId));
+        courseProgressRepository.findByStudentIdAndCourseId(student.getId(), courseId)
+                .ifPresent(courseProgressRepository::delete);
+        enrollmentRepository.delete(enrollment);
     }
 
     public List<EnrollmentResponse> getMyEnrollments(User student) {
         return enrollmentRepository.findByStudentId(student.getId()).stream()
                 .map(e -> {
-                    int progress = courseProgressRepository
+                    CourseProgress cp = courseProgressRepository
                             .findByStudentIdAndCourseId(student.getId(), e.getCourse().getId())
-                            .map(CourseProgress::getProgressPercent)
-                            .orElse(0);
+                            .orElse(null);
+                    int progress = cp != null ? cp.getProgressPercent() : 0;
+                    String completedAt = (cp != null && cp.getCompletedAt() != null)
+                            ? cp.getCompletedAt().toString()
+                            : null;
+                    String courseUpdatedAt = e.getCourse().getContentUpdatedAt() != null
+                            ? e.getCourse().getContentUpdatedAt().toString()
+                            : null;
                     return EnrollmentResponse.builder()
                             .courseId(e.getCourse().getId())
                             .courseTitle(e.getCourse().getTitle())
+                            .category(e.getCourse().getCategory())
                             .thumbnailUrl(e.getCourse().getThumbnailUrl())
                             .enrolledAt(e.getEnrolledAt())
                             .progressPercent(progress)
+                            .completedAt(completedAt)
+                            .courseUpdatedAt(courseUpdatedAt)
                             .build();
                 })
                 .toList();

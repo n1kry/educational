@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -37,6 +38,12 @@ public class CourseService {
 
     public List<CourseResponse> getTeacherCourses(Long teacherId) {
         return courseRepository.findByTeacherId(teacherId).stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
+    public List<CourseResponse> getAllCourses() {
+        return courseRepository.findAll().stream()
                 .map(this::toResponse)
                 .toList();
     }
@@ -85,6 +92,7 @@ public class CourseService {
                 .position(req.getPosition())
                 .build();
         sectionRepository.save(section);
+        touchContent(course);
         return toSectionResponse(section);
     }
 
@@ -95,14 +103,17 @@ public class CourseService {
         section.setTitle(req.getTitle());
         section.setPosition(req.getPosition());
         sectionRepository.save(section);
+        touchContent(section.getCourse());
         return toSectionResponse(section);
     }
 
     @Transactional
     public void deleteSection(Long sectionId, User user) {
         Section section = findSectionOrThrow(sectionId);
-        checkCourseOwnership(section.getCourse(), user);
+        Course course = section.getCourse();
+        checkCourseOwnership(course, user);
         sectionRepository.delete(section);
+        touchContent(course);
     }
 
     @Transactional
@@ -118,6 +129,7 @@ public class CourseService {
                 .position(req.getPosition())
                 .build();
         lessonRepository.save(lesson);
+        touchContent(section.getCourse());
         return toLessonResponse(lesson);
     }
 
@@ -131,14 +143,17 @@ public class CourseService {
         lesson.setDurationMinutes(req.getDurationMinutes());
         lesson.setPosition(req.getPosition());
         lessonRepository.save(lesson);
+        touchContent(lesson.getSection().getCourse());
         return toLessonResponse(lesson);
     }
 
     @Transactional
     public void deleteLesson(Long lessonId, User user) {
         Lesson lesson = findLessonOrThrow(lessonId);
-        checkCourseOwnership(lesson.getSection().getCourse(), user);
+        Course course = lesson.getSection().getCourse();
+        checkCourseOwnership(course, user);
         lessonRepository.delete(lesson);
+        touchContent(course);
     }
 
     public CourseResponse toResponse(Course c) {
@@ -240,6 +255,11 @@ public class CourseService {
         Course course = findCourseOrThrow(courseId);
         checkCourseOwnership(course, user);
         return course;
+    }
+
+    private void touchContent(Course course) {
+        course.setContentUpdatedAt(LocalDateTime.now());
+        courseRepository.save(course);
     }
 
     private void checkCourseOwnership(Course course, User user) {

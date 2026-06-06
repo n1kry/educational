@@ -9,7 +9,10 @@ import java.time.LocalDateTime;
 public class EnrollmentResponse {
     private Long courseId;
     private String courseTitle;
+    private String category;
     private String thumbnailUrl;
     private LocalDateTime enrolledAt;
     private int progressPercent;
+    private String completedAt;
+    private String courseUpdatedAt;
 }

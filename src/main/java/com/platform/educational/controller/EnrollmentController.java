@@ -31,4 +31,12 @@ public class EnrollmentController {
     public List<EnrollmentResponse> getMyEnrollments(@AuthenticationPrincipal User user) {
         return enrollmentService.getMyEnrollments(user);
     }
+
+    @DeleteMapping("/{courseId}")
+    @PreAuthorize("hasRole('STUDENT')")
+    public ResponseEntity<Void> unenroll(@PathVariable Long courseId,
+                                         @AuthenticationPrincipal User user) {
+        enrollmentService.unenroll(courseId, user);
+        return ResponseEntity.noContent().build();
+    }
 }

@@ -3,6 +3,7 @@ package com.platform.educational.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,8 +34,16 @@ public class Course {
     @JoinColumn(name = "teacher_id", nullable = false)
     private User teacher;
 
+    @Column(name = "content_updated_at")
+    private LocalDateTime contentUpdatedAt;
+
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("position ASC")
     @Builder.Default
     private List<Section> sections = new ArrayList<>();
+
+    @PrePersist
+    private void prePersist() {
+        contentUpdatedAt = LocalDateTime.now();
+    }
 }
