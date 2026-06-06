@@ -1,0 +1,43 @@
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  h2 { margin: 0; }
+}
+
+.center { display: flex; justify-content: center; padding: 48px; }
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 64px;
+  color: var(--mat-sys-on-surface-variant);
+  mat-icon { font-size: 64px; width: 64px; height: 64px; }
+}
+
+.courses-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 24px;
+}
+
+.course-card {
+  display: flex;
+  flex-direction: column;
+  img { height: 160px; object-fit: cover; }
+}
+
+.description {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  color: var(--mat-sys-on-surface-variant);
+  font-size: 14px;
+}
+
+.chip-published { background: #e8f5e9; color: #2e7d32; }
+.chip-draft     { background: #fff3e0; color: #e65100; }

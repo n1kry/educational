@@ -1,0 +1,129 @@
+@if (loading) {
+  <div class="center"><mat-spinner /></div>
+} @else {
+
+<div class="detail-layout">
+
+  <div class="main">
+    <button mat-button routerLink="/courses" class="back-btn">
+      <mat-icon>arrow_back</mat-icon> Назад к каталогу
+    </button>
+
+    <h1>{{ course.title }}</h1>
+    <p class="teacher">
+      <mat-icon inline>person</mat-icon> {{ course.teacherName }}
+    </p>
+    <mat-chip class="cat-chip">{{ course.category }}</mat-chip>
+
+    <p class="description">{{ course.description }}</p>
+
+    <mat-divider style="margin: 24px 0" />
+
+    <h3>Содержание курса</h3>
+    <p class="meta">
+      {{ course.sections.length }} разделов · {{ totalLessons() }} уроков
+      @if (course.finalQuiz) { · Итоговый тест }
+    </p>
+
+    <mat-accordion multi>
+      @for (section of course.sections; track section.id) {
+        <mat-expansion-panel>
+          <mat-expansion-panel-header>
+            <mat-panel-title>{{ section.position }}. {{ section.title }}</mat-panel-title>
+            <mat-panel-description>
+              {{ section.lessons.length }} уроков
+              @if (section.quiz) { · Тест }
+            </mat-panel-description>
+          </mat-expansion-panel-header>
+
+          @for (lesson of section.lessons; track lesson.id) {
+            <div class="lesson-row">
+              <mat-icon class="lesson-icon">play_circle</mat-icon>
+              <span>{{ lesson.position }}. {{ lesson.title }}</span>
+              @if (lesson.durationMinutes) {
+                <span class="lesson-dur">{{ lesson.durationMinutes }} мин</span>
+              }
+            </div>
+          }
+
+          @if (section.quiz) {
+            <div class="lesson-row quiz-row">
+              <mat-icon class="lesson-icon quiz-icon">quiz</mat-icon>
+              <span>{{ section.quiz.title }}</span>
+              <span class="lesson-dur">{{ section.quiz.questions.length }} вопросов</span>
+            </div>
+          }
+        </mat-expansion-panel>
+      }
+
+      @if (course.finalQuiz) {
+        <mat-expansion-panel>
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              <mat-icon style="margin-right:8px;color:var(--mat-sys-primary)">emoji_events</mat-icon>
+              Итоговый тест
+            </mat-panel-title>
+            <mat-panel-description>{{ course.finalQuiz.questions.length }} вопросов · Проходной балл {{ course.finalQuiz.passingScore }}%</mat-panel-description>
+          </mat-expansion-panel-header>
+          <p style="color:var(--mat-sys-on-surface-variant);font-size:14px;margin:0">
+            Итоговый тест открывается после прохождения всех разделов курса.
+          </p>
+        </mat-expansion-panel>
+      }
+    </mat-accordion>
+  </div>
+
+  <div class="sidebar">
+    <mat-card class="enroll-card">
+      @if (course.thumbnailUrl) {
+        <img mat-card-image [src]="course.thumbnailUrl" [alt]="course.title" class="thumb">
+      }
+      <mat-card-content>
+        <div class="stats">
+          <div class="stat">
+            <mat-icon>layers</mat-icon>
+            <span>{{ course.sections.length }} разделов</span>
+          </div>
+          <div class="stat">
+            <mat-icon>play_circle</mat-icon>
+            <span>{{ totalLessons() }} уроков</span>
+          </div>
+          @if (course.finalQuiz) {
+            <div class="stat">
+              <mat-icon>emoji_events</mat-icon>
+              <span>Итоговый тест</span>
+            </div>
+          }
+        </div>
+      </mat-card-content>
+      <mat-card-actions>
+        @if (isStudent) {
+          @if (enrolled) {
+            @if (completedAt) {
+              <div class="completed-info">
+                <mat-icon>school</mat-icon>
+                <span>Завершён {{ formatDate(completedAt) }}</span>
+              </div>
+            }
+            <button mat-flat-button class="full-width" (click)="goLearn()">
+              <mat-icon>{{ completedAt ? 'replay' : 'play_arrow' }}</mat-icon>
+              {{ completedAt ? 'Просмотреть снова' : 'Продолжить обучение' }}
+            </button>
+          } @else {
+            <button mat-flat-button class="full-width" (click)="enroll()" [disabled]="enrolling">
+              @if (enrolling) { <mat-spinner diameter="20" /> }
+              @else { Записаться на курс }
+            </button>
+          }
+        } @else if (!auth.isLoggedIn()) {
+          <button mat-flat-button class="full-width" (click)="enroll()">
+            Войти и записаться
+          </button>
+        }
+      </mat-card-actions>
+    </mat-card>
+  </div>
+
+</div>
+
+}

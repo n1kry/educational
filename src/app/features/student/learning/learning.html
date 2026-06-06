@@ -1,0 +1,111 @@
+@if (loading) {
+  <div class="center"><mat-spinner /></div>
+} @else {
+
+<mat-sidenav-container class="sidenav-container">
+
+  <mat-sidenav mode="side" opened class="sidenav">
+    <div class="sidebar-header">
+      <h3>{{ course.title }}</h3>
+      <mat-progress-bar mode="determinate" [value]="progress.progressPercent"
+        [color]="progress.completedAt ? 'accent' : 'primary'" />
+      <span class="progress-label">{{ progress.progressPercent }}% завершено</span>
+      @if (progress.completedAt) {
+        <div class="completed-badge"><mat-icon>school</mat-icon> Завершён {{ formatDate(progress.completedAt) }}</div>
+      }
+    </div>
+
+    <mat-divider />
+
+    @for (section of course.sections; track section.id) {
+      <div class="section-block">
+        <div class="section-title">{{ section.position }}. {{ section.title }}</div>
+
+        @for (lesson of section.lessons; track lesson.id) {
+          <div class="lesson-item"
+               [class.active]="activeLesson?.id === lesson.id"
+               (click)="selectLesson(lesson)">
+            <mat-icon class="item-icon" [class.done]="isCompleted(lesson.id)">
+              {{ isCompleted(lesson.id) ? 'check_circle' : 'play_circle_outline' }}
+            </mat-icon>
+            <span>{{ lesson.title }}</span>
+          </div>
+        }
+
+        @if (section.quiz) {
+          <div class="lesson-item quiz-item"
+               [class.locked]="isQuizLocked(section)"
+               [matTooltip]="isQuizLocked(section) ? 'Пройдите тест предыдущего раздела' : ''"
+               (click)="!isQuizLocked(section) && goQuiz(section.quiz!.id)">
+            <mat-icon class="item-icon quiz-icon" [class.done]="isQuizPassed(section.quiz.id)">
+              {{ isQuizPassed(section.quiz.id) ? 'check_circle' : (isQuizLocked(section) ? 'lock' : 'quiz') }}
+            </mat-icon>
+            <span>{{ section.quiz.title }}</span>
+          </div>
+        }
+      </div>
+      <mat-divider />
+    }
+
+    @if (course.finalQuiz) {
+      <div class="section-block">
+        <div class="lesson-item quiz-item"
+             [class.locked]="!isQuizPassed(course.sections[course.sections.length - 1]?.quiz?.id ?? -1)"
+             (click)="isQuizPassed(course.sections[course.sections.length - 1]?.quiz?.id ?? -1) && goQuiz(course.finalQuiz!.id)">
+          <mat-icon class="item-icon quiz-icon" [class.done]="isQuizPassed(course.finalQuiz.id)">
+            {{ isQuizPassed(course.finalQuiz.id) ? 'emoji_events' : 'lock' }}
+          </mat-icon>
+          <span>Итоговый тест</span>
+        </div>
+      </div>
+    }
+  </mat-sidenav>
+
+  <mat-sidenav-content class="content">
+    @if (activeLesson) {
+      <h2>{{ activeLesson.title }}</h2>
+
+      @if (activeLesson.description) {
+        <p class="lesson-desc">{{ activeLesson.description }}</p>
+      }
+
+      @if (safeUrl) {
+        <div class="video-wrapper">
+          <iframe [src]="safeUrl"
+                  allowfullscreen
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture">
+          </iframe>
+        </div>
+      } @else {
+        <div class="no-video">
+          <mat-icon>videocam_off</mat-icon>
+          <p>Видео для этого урока не добавлено</p>
+        </div>
+      }
+
+      <div class="lesson-actions">
+        @if (isCompleted(activeLesson.id)) {
+          <button mat-flat-button disabled class="lesson-btn">
+            <mat-icon>check_circle</mat-icon><span>Урок пройден</span>
+          </button>
+        } @else if (completing) {
+          <button mat-flat-button disabled class="lesson-btn">
+            <mat-spinner diameter="20" />
+          </button>
+        } @else {
+          <button mat-flat-button (click)="completeLesson()" class="lesson-btn">
+            <mat-icon>done</mat-icon><span>Отметить как пройденный</span>
+          </button>
+        }
+      </div>
+    } @else {
+      <div class="placeholder">
+        <mat-icon>menu_book</mat-icon>
+        <p>Выберите урок из списка</p>
+      </div>
+    }
+  </mat-sidenav-content>
+
+</mat-sidenav-container>
+
+}

@@ -1,0 +1,105 @@
+<div class="page-header">
+  <h2>Мои курсы</h2>
+</div>
+
+@if (!loading && enrollments.length > 0) {
+  <div class="toolbar">
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label>Поиск по названию</mat-label>
+      <input matInput [(ngModel)]="search" placeholder="Введите название...">
+      @if (search) {
+        <button matSuffix mat-icon-button (click)="search = ''"><mat-icon>close</mat-icon></button>
+      } @else {
+        <mat-icon matSuffix>search</mat-icon>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="category-field">
+      <mat-label>Категория</mat-label>
+      <mat-select [(ngModel)]="selectedCategory">
+        <mat-option value="">Все категории</mat-option>
+        @for (cat of categories; track cat) {
+          <mat-option [value]="cat">{{ cat }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <div class="checkboxes">
+      <mat-checkbox [(ngModel)]="hideCompleted">Скрыть пройденные</mat-checkbox>
+      <mat-checkbox [(ngModel)]="showUpdatedCompleted" [disabled]="!hideCompleted"
+        [matTooltip]="hideCompleted ? '' : 'Сначала включите «Скрыть пройденные»'">
+        С новым контентом
+      </mat-checkbox>
+    </div>
+  </div>
+}
+
+@if (loading) {
+  <div class="center"><mat-spinner /></div>
+} @else if (enrollments.length === 0) {
+  <div class="empty">
+    <mat-icon>school</mat-icon>
+    <p>Вы ещё не записаны ни на один курс</p>
+    <button mat-flat-button routerLink="/courses">Перейти в каталог</button>
+  </div>
+} @else if (filteredEnrollments.length === 0) {
+  <div class="empty">
+    <mat-icon>{{ hasActiveFilters ? 'search_off' : 'done_all' }}</mat-icon>
+    <p>{{ hasActiveFilters ? 'Ничего не найдено' : 'Все пройденные курсы скрыты' }}</p>
+    @if (hasActiveFilters) {
+      <button mat-button (click)="clearFilters()">Сбросить фильтры</button>
+    } @else {
+      <button mat-button (click)="hideCompleted = false">Показать все</button>
+    }
+  </div>
+} @else {
+  <div class="grid">
+    @for (e of filteredEnrollments; track e.courseId) {
+      <mat-card class="card" (click)="go(e.courseId)">
+        <div class="thumb-wrap">
+          @if (e.thumbnailUrl) {
+            <img mat-card-image [src]="e.thumbnailUrl" [alt]="e.courseTitle" class="thumb">
+          } @else {
+            <div class="thumb-placeholder"></div>
+          }
+          @if (isUpdatedAfterCompletion(e)) {
+            <div class="updated-overlay">
+              <mat-icon>new_releases</mat-icon>
+              <span>Новый контент</span>
+            </div>
+          }
+        </div>
+
+        <mat-card-header>
+          <mat-card-title>{{ e.courseTitle }}</mat-card-title>
+          <mat-card-subtitle>
+            @if (e.completedAt) {
+              <span class="completed-badge">
+                <mat-icon inline>school</mat-icon> Завершён {{ formatDate(e.completedAt) }}
+              </span>
+            } @else {
+              {{ e.category }} · Прогресс: {{ e.progressPercent }}%
+            }
+          </mat-card-subtitle>
+        </mat-card-header>
+
+        <mat-card-content class="card-body">
+          <mat-progress-bar mode="determinate" [value]="e.progressPercent"
+            [color]="e.completedAt ? 'accent' : 'primary'" />
+        </mat-card-content>
+
+        <mat-card-actions class="card-actions">
+          <button mat-flat-button (click)="$event.stopPropagation(); go(e.courseId)">
+            <mat-icon>{{ e.completedAt ? 'replay' : 'play_arrow' }}</mat-icon>
+            {{ e.completedAt ? 'Просмотреть снова' : (e.progressPercent === 0 ? 'Начать' : 'Продолжить') }}
+          </button>
+          <button mat-icon-button class="unenroll-btn"
+            matTooltip="Отписаться от курса"
+            (click)="unenroll(e, $event)">
+            <mat-icon>logout</mat-icon>
+          </button>
+        </mat-card-actions>
+      </mat-card>
+    }
+  </div>
+}

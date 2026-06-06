@@ -1,0 +1,221 @@
+@if (loading) {
+  <div class="center"><mat-spinner /></div>
+} @else {
+
+<div class="page-header">
+  <button mat-icon-button routerLink="/teacher"><mat-icon>arrow_back</mat-icon></button>
+  <h2>{{ course.title }}</h2>
+  <span class="spacer"></span>
+  <button mat-stroked-button (click)="togglePublish()">
+    <mat-icon>{{ course.published ? 'visibility_off' : 'visibility' }}</mat-icon>
+    {{ course.published ? 'Снять с публикации' : 'Опубликовать' }}
+  </button>
+</div>
+
+<mat-card class="section-card">
+  <mat-card-header><mat-card-title>Информация о курсе</mat-card-title></mat-card-header>
+  <mat-card-content>
+    <form [formGroup]="courseForm" (ngSubmit)="saveCourse()">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Название</mat-label>
+        <input matInput formControlName="title">
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Описание</mat-label>
+        <textarea matInput formControlName="description" rows="3"></textarea>
+      </mat-form-field>
+      <div class="row-2">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Категория</mat-label>
+          <mat-select formControlName="category">
+            @for (cat of categories; track cat) {
+              <mat-option [value]="cat">{{ cat }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>URL обложки</mat-label>
+          <input matInput formControlName="thumbnailUrl">
+        </mat-form-field>
+      </div>
+      <div class="actions">
+        <button mat-flat-button type="submit" [disabled]="courseForm.invalid">Сохранить</button>
+      </div>
+    </form>
+  </mat-card-content>
+</mat-card>
+
+<mat-card class="section-card">
+  <mat-card-header><mat-card-title>Разделы</mat-card-title></mat-card-header>
+  <mat-card-content>
+
+    <mat-accordion multi>
+      @for (section of course.sections; track section.id) {
+        <mat-expansion-panel>
+          <mat-expansion-panel-header>
+            <mat-panel-title>{{ section.position }}. {{ section.title }}</mat-panel-title>
+            <mat-panel-description>
+              {{ section.lessons.length }} уроков · {{ section.quiz ? 'Тест есть' : 'Нет теста' }}
+            </mat-panel-description>
+          </mat-expansion-panel-header>
+
+          <div class="lessons-list">
+            @for (lesson of section.lessons; track lesson.id) {
+              <div class="lesson-row">
+                <mat-icon class="lesson-icon">play_circle</mat-icon>
+                <span class="lesson-title">{{ lesson.position }}. {{ lesson.title }}</span>
+                @if (lesson.durationMinutes) {
+                  <span class="lesson-meta">{{ lesson.durationMinutes }} мин</span>
+                }
+                <button mat-icon-button color="warn" (click)="deleteLesson(lesson.id)">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+            }
+          </div>
+
+          @if (addingLessonForSection === section.id) {
+            <div class="inline-form" [formGroup]="lessonForm">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Название урока</mat-label>
+                <input matInput formControlName="title">
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Описание</mat-label>
+                <textarea matInput formControlName="description" rows="2"></textarea>
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>YouTube URL</mat-label>
+                <input matInput formControlName="videoUrl" placeholder="https://www.youtube.com/watch?v=...">
+                <mat-icon matSuffix>smart_display</mat-icon>
+              </mat-form-field>
+              <div class="row-2">
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Длительность (мин)</mat-label>
+                  <input matInput type="number" formControlName="durationMinutes">
+                </mat-form-field>
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Порядковый номер</mat-label>
+                  <input matInput type="number" formControlName="position">
+                </mat-form-field>
+              </div>
+              <div class="actions">
+                <button mat-button (click)="addingLessonForSection = null">Отмена</button>
+                <button mat-flat-button (click)="addLesson(section.id)" [disabled]="lessonForm.invalid">
+                  Добавить урок
+                </button>
+              </div>
+            </div>
+          } @else {
+            <button mat-button (click)="showAddLesson(section.id)">
+              <mat-icon>add</mat-icon> Добавить урок
+            </button>
+          }
+
+          <mat-divider style="margin: 16px 0" />
+
+          @if (section.quiz) {
+            <div class="quiz-block">
+              <div class="quiz-header">
+                <mat-icon>quiz</mat-icon>
+                <strong>{{ section.quiz.title }}</strong>
+                <span class="lesson-meta">Проходной балл: {{ section.quiz.passingScore }}%</span>
+              </div>
+
+              @for (q of section.quiz.questions; track q.id) {
+                <div class="question-row">
+                  <span>{{ q.text }}</span>
+                  <button mat-icon-button color="warn" (click)="deleteQuestion(q.id)">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </div>
+              }
+
+              @if (addingQuestionForQuiz === section.quiz.id) {
+                <div class="inline-form" [formGroup]="questionForm">
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Вопрос</mat-label>
+                    <textarea matInput formControlName="text" rows="2"></textarea>
+                  </mat-form-field>
+
+                  @for (ctrl of getOptionControls(); track $index) {
+                    <div [formGroup]="$any(ctrl)" class="option-row">
+                      <span class="option-key">{{ ['A','B','C','D'][$index] }}</span>
+                      <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>Вариант {{ ['A','B','C','D'][$index] }}</mat-label>
+                        <input matInput formControlName="text">
+                      </mat-form-field>
+                    </div>
+                  }
+
+                  <mat-form-field appearance="outline">
+                    <mat-label>Правильный ответ</mat-label>
+                    <mat-select formControlName="correctAnswer">
+                      <mat-option value="A">A</mat-option>
+                      <mat-option value="B">B</mat-option>
+                      <mat-option value="C">C</mat-option>
+                      <mat-option value="D">D</mat-option>
+                    </mat-select>
+                  </mat-form-field>
+
+                  <div class="actions">
+                    <button mat-button (click)="addingQuestionForQuiz = null">Отмена</button>
+                    <button mat-flat-button (click)="addQuestion(section.quiz!.id)" [disabled]="questionForm.invalid">
+                      Добавить вопрос
+                    </button>
+                  </div>
+                </div>
+              } @else {
+                <button mat-button (click)="showAddQuestion(section.quiz.id)">
+                  <mat-icon>add</mat-icon> Добавить вопрос
+                </button>
+              }
+            </div>
+          } @else if (addingQuizForSection === section.id) {
+            <div class="inline-form" [formGroup]="quizForm">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Название теста</mat-label>
+                <input matInput formControlName="title">
+              </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>Проходной балл (%)</mat-label>
+                <input matInput type="number" formControlName="passingScore">
+              </mat-form-field>
+              <div class="actions">
+                <button mat-button (click)="addingQuizForSection = null">Отмена</button>
+                <button mat-flat-button (click)="createSectionQuiz(section.id)" [disabled]="quizForm.invalid">
+                  Создать тест
+                </button>
+              </div>
+            </div>
+          } @else {
+            <button mat-button (click)="showAddQuiz(section.id)">
+              <mat-icon>quiz</mat-icon> Добавить тест к разделу
+            </button>
+          }
+
+          <div class="panel-actions">
+            <button mat-button color="warn" (click)="deleteSection(section.id)">
+              <mat-icon>delete</mat-icon> Удалить раздел
+            </button>
+          </div>
+        </mat-expansion-panel>
+      }
+    </mat-accordion>
+
+    <mat-divider style="margin: 16px 0" />
+
+    <div class="add-section" [formGroup]="sectionForm">
+      <mat-form-field appearance="outline">
+        <mat-label>Название нового раздела</mat-label>
+        <input matInput formControlName="title">
+      </mat-form-field>
+      <button mat-flat-button (click)="addSection()" [disabled]="sectionForm.invalid">
+        <mat-icon>add</mat-icon> Добавить раздел
+      </button>
+    </div>
+
+  </mat-card-content>
+</mat-card>
+
+}

@@ -1,0 +1,48 @@
+<div class="page-header">
+  <button mat-icon-button routerLink="/teacher"><mat-icon>arrow_back</mat-icon></button>
+  <h2>Новый курс</h2>
+</div>
+
+<mat-card class="form-card">
+  <mat-card-content>
+    <form [formGroup]="form" (ngSubmit)="submit()">
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Название курса</mat-label>
+        <input matInput formControlName="title">
+        @if (form.get('title')?.hasError('required')) {
+          <mat-error>Обязательное поле</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Описание</mat-label>
+        <textarea matInput formControlName="description" rows="4"></textarea>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Категория</mat-label>
+        <mat-select formControlName="category">
+          @for (cat of categories; track cat) {
+            <mat-option [value]="cat">{{ cat }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>URL обложки (необязательно)</mat-label>
+        <input matInput formControlName="thumbnailUrl" placeholder="https://...">
+        <mat-icon matSuffix>image</mat-icon>
+      </mat-form-field>
+
+      <div class="actions">
+        <a mat-button routerLink="/teacher">Отмена</a>
+        <button mat-flat-button type="submit" [disabled]="loading || form.invalid">
+          @if (loading) { <mat-spinner diameter="20" /> }
+          @else { Создать и перейти к редактированию }
+        </button>
+      </div>
+
+    </form>
+  </mat-card-content>
+</mat-card>
