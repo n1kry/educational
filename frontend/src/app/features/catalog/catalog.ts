@@ -63,7 +63,6 @@ export class CatalogComponent implements OnInit {
   canEnroll(course: CourseResponse): boolean {
     if (!this.auth.isLoggedIn()) return false;
     return course.teacherId !== this.auth.userId();
-
   }
 
   ngOnInit() {

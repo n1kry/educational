@@ -27,13 +27,13 @@ import { CourseDetailResponse, LessonResponse, ProgressResponse, SectionResponse
 export class LearningComponent implements OnInit {
   courseId!: number;
   course!: CourseDetailResponse;
-  progress!: ProgressResponse;
   loading = true;
 
   activeLesson: LessonResponse | null = null;
   safeUrl: SafeResourceUrl | null = null;
   completing = false;
   private returnLessonId: number | null = null;
+  progress: ProgressResponse = { progressPercent: 0, completedLessonIds: [], passedQuizIds: [], completedAt: null };
 
   constructor(
     private route: ActivatedRoute,
