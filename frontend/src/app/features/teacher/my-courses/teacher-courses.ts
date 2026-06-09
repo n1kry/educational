@@ -6,9 +6,11 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { CourseService } from '../../../core/services/course.service';
 import { SlicePipe } from '@angular/common';
 import { CourseResponse } from '../../../core/models/course.model';
+import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog';
 
 @Component({
   selector: 'app-teacher-courses',
@@ -16,7 +18,7 @@ import { CourseResponse } from '../../../core/models/course.model';
   imports: [
     RouterLink, SlicePipe,
     MatCardModule, MatButtonModule, MatIconModule, MatChipsModule, MatProgressSpinnerModule,
-    MatTooltipModule
+    MatTooltipModule, MatDialogModule
   ],
   templateUrl: './teacher-courses.html',
   styleUrl: './teacher-courses.scss'
@@ -28,6 +30,7 @@ export class TeacherCoursesComponent implements OnInit {
   constructor(
     private courseService: CourseService,
     private router: Router,
+    private dialog: MatDialog,
     private cdr: ChangeDetectorRef
   ) {}
 
@@ -46,10 +49,14 @@ export class TeacherCoursesComponent implements OnInit {
   }
 
   deleteCourse(id: number) {
-    if (!confirm('Удалить курс?')) return;
-    this.courseService.deleteCourse(id).subscribe(() => {
-      this.courses = this.courses.filter(c => c.id !== id);
-      this.cdr.detectChanges();
+    this.dialog.open(ConfirmDialogComponent, {
+      data: { title: 'Удалить курс', message: 'Это действие нельзя отменить. Курс будет удалён безвозвратно.' }
+    }).afterClosed().subscribe(confirmed => {
+      if (!confirmed) return;
+      this.courseService.deleteCourse(id).subscribe(() => {
+        this.courses = this.courses.filter(c => c.id !== id);
+        this.cdr.detectChanges();
+      });
     });
   }
 

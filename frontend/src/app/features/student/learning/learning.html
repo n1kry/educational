@@ -4,9 +4,16 @@
 
 <mat-sidenav-container class="sidenav-container">
 
-  <mat-sidenav mode="side" opened class="sidenav">
+  <mat-sidenav [mode]="isMobile ? 'over' : 'side'" [(opened)]="sidenavOpened" class="sidenav">
     <div class="sidebar-header">
-      <h3>{{ course.title }}</h3>
+      <div class="sidebar-title-row">
+        <h3>{{ course.title }}</h3>
+        @if (isMobile) {
+          <button mat-icon-button (click)="sidenavOpened = false">
+            <mat-icon>close</mat-icon>
+          </button>
+        }
+      </div>
       <mat-progress-bar mode="determinate" [value]="progress.progressPercent"
         [color]="progress.completedAt ? 'accent' : 'primary'" />
       <span class="progress-label">{{ progress.progressPercent }}% завершено</span>
@@ -24,7 +31,7 @@
         @for (lesson of section.lessons; track lesson.id) {
           <div class="lesson-item"
                [class.active]="activeLesson?.id === lesson.id"
-               (click)="selectLesson(lesson)">
+               (click)="selectLesson(lesson); isMobile && (sidenavOpened = false)">
             <mat-icon class="item-icon" [class.done]="isCompleted(lesson.id)">
               {{ isCompleted(lesson.id) ? 'check_circle' : 'play_circle_outline' }}
             </mat-icon>
@@ -36,7 +43,7 @@
           <div class="lesson-item quiz-item"
                [class.locked]="isQuizLocked(section)"
                [matTooltip]="isQuizLocked(section) ? 'Пройдите тест предыдущего раздела' : ''"
-               (click)="!isQuizLocked(section) && goQuiz(section.quiz!.id)">
+               (click)="!isQuizLocked(section) && goQuiz(section.quiz!.id); isMobile && (sidenavOpened = false)">
             <mat-icon class="item-icon quiz-icon" [class.done]="isQuizPassed(section.quiz.id)">
               {{ isQuizPassed(section.quiz.id) ? 'check_circle' : (isQuizLocked(section) ? 'lock' : 'quiz') }}
             </mat-icon>
@@ -64,6 +71,11 @@
   <mat-sidenav-content class="content">
     @if (activeLesson) {
       <div class="content-scroll">
+        @if (isMobile) {
+          <button mat-icon-button class="menu-toggle" (click)="sidenavOpened = true">
+            <mat-icon>menu</mat-icon>
+          </button>
+        }
         <h2>{{ activeLesson.title }}</h2>
 
         @if (activeLesson.description) {

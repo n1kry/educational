@@ -3,32 +3,75 @@
 
   <span class="spacer"></span>
 
-  <a mat-button routerLink="/courses" routerLinkActive="active-link">Курсы</a>
+  <nav class="desktop-nav">
+    <a mat-button routerLink="/courses" routerLinkActive="active-link">Курсы</a>
 
-  @if (auth.isLoggedIn()) {
-    <a mat-button routerLink="/my-courses" routerLinkActive="active-link">Мои курсы</a>
+    @if (auth.isLoggedIn()) {
+      <a mat-button routerLink="/my-courses" routerLinkActive="active-link">Мои курсы</a>
 
-    @if (auth.role() === 'TEACHER' || auth.role() === 'ADMIN') {
-      <a mat-button routerLink="/teacher" routerLinkActive="active-link">Кабинет учителя</a>
-    }
+      @if (auth.role() === 'TEACHER' || auth.role() === 'ADMIN') {
+        <a mat-button routerLink="/teacher" routerLinkActive="active-link">Кабинет учителя</a>
+      }
 
-    @if (auth.role() === 'ADMIN') {
-      <a mat-button routerLink="/admin" routerLinkActive="active-link">Админ</a>
-    }
+      @if (auth.role() === 'ADMIN') {
+        <a mat-button routerLink="/admin" routerLinkActive="active-link">Админ</a>
+      }
 
-    <button mat-button [matMenuTriggerFor]="userMenu">
-      <mat-icon>account_circle</mat-icon>
-      {{ auth.user()?.name }}
-    </button>
-
-    <mat-menu #userMenu="matMenu">
-      <button mat-menu-item (click)="auth.logout()">
-        <mat-icon>logout</mat-icon>
-        Выйти
+      <button mat-button [matMenuTriggerFor]="userMenu">
+        <mat-icon>account_circle</mat-icon>
+        {{ auth.user()?.name }}
       </button>
-    </mat-menu>
-  } @else {
-    <a mat-button routerLink="/login">Войти</a>
-    <a mat-flat-button routerLink="/register">Регистрация</a>
-  }
+
+      <mat-menu #userMenu="matMenu">
+        <button mat-menu-item (click)="auth.logout()">
+          <mat-icon>logout</mat-icon>
+          Выйти
+        </button>
+      </mat-menu>
+    } @else {
+      <a mat-button routerLink="/login">Войти</a>
+      <a mat-flat-button routerLink="/register">Регистрация</a>
+    }
+  </nav>
+
+  <button mat-icon-button class="mobile-menu-btn" [matMenuTriggerFor]="mobileMenu">
+    <mat-icon>menu</mat-icon>
+  </button>
+
+  <mat-menu #mobileMenu="matMenu">
+    <a mat-menu-item routerLink="/courses">
+      <mat-icon>school</mat-icon> Курсы
+    </a>
+
+    @if (auth.isLoggedIn()) {
+      <a mat-menu-item routerLink="/my-courses">
+        <mat-icon>bookmark</mat-icon> Мои курсы
+      </a>
+
+      @if (auth.role() === 'TEACHER' || auth.role() === 'ADMIN') {
+        <a mat-menu-item routerLink="/teacher">
+          <mat-icon>edit_note</mat-icon> Кабинет учителя
+        </a>
+      }
+
+      @if (auth.role() === 'ADMIN') {
+        <a mat-menu-item routerLink="/admin">
+          <mat-icon>admin_panel_settings</mat-icon> Админ
+        </a>
+      }
+
+      <mat-divider />
+
+      <button mat-menu-item (click)="auth.logout()">
+        <mat-icon>logout</mat-icon> Выйти
+      </button>
+    } @else {
+      <a mat-menu-item routerLink="/login">
+        <mat-icon>login</mat-icon> Войти
+      </a>
+      <a mat-menu-item routerLink="/register">
+        <mat-icon>person_add</mat-icon> Регистрация
+      </a>
+    }
+  </mat-menu>
 </mat-toolbar>

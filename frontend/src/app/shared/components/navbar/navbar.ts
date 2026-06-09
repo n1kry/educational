@@ -4,6 +4,7 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatIconModule } from '@angular/material/icon';
+import { MatDividerModule } from '@angular/material/divider';
 import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
@@ -11,7 +12,7 @@ import { AuthService } from '../../../core/services/auth.service';
   standalone: true,
   imports: [
     RouterLink, RouterLinkActive,
-    MatToolbarModule, MatButtonModule, MatMenuModule, MatIconModule
+    MatToolbarModule, MatButtonModule, MatMenuModule, MatIconModule, MatDividerModule
   ],
   templateUrl: './navbar.html',
   styleUrl: './navbar.scss'

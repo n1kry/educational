@@ -11,7 +11,8 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { MatDialogModule } from '@angular/material/dialog';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { QuillModule } from 'ngx-quill';
 import { QUILL_MODULES } from '../../../shared/quill-config';
@@ -68,6 +69,7 @@ export class EditCourseComponent implements OnInit {
     private fb: FormBuilder,
     private courseService: CourseService,
     private snack: MatSnackBar,
+    private dialog: MatDialog,
     private cdr: ChangeDetectorRef
   ) {}
 
@@ -204,8 +206,11 @@ export class EditCourseComponent implements OnInit {
   }
 
   deleteSection(sectionId: number) {
-    if (!confirm('Удалить раздел и все его уроки?')) return;
-    this.courseService.deleteSection(sectionId).subscribe(() => this.loadCourse());
+    this.dialog.open(ConfirmDialogComponent, {
+      data: { title: 'Удалить раздел', message: 'Раздел и все его уроки будут удалены безвозвратно.' }
+    }).afterClosed().subscribe(confirmed => {
+      if (confirmed) this.courseService.deleteSection(sectionId).subscribe(() => this.loadCourse());
+    });
   }
 
   showAddLesson(sectionId: number) {
@@ -244,8 +249,11 @@ export class EditCourseComponent implements OnInit {
   }
 
   deleteLesson(lessonId: number) {
-    if (!confirm('Удалить урок?')) return;
-    this.courseService.deleteLesson(lessonId).subscribe(() => this.loadCourse());
+    this.dialog.open(ConfirmDialogComponent, {
+      data: { title: 'Удалить урок', message: 'Урок будет удалён безвозвратно.' }
+    }).afterClosed().subscribe(confirmed => {
+      if (confirmed) this.courseService.deleteLesson(lessonId).subscribe(() => this.loadCourse());
+    });
   }
 
   showAddQuiz(sectionId: number) {
@@ -317,7 +325,10 @@ export class EditCourseComponent implements OnInit {
   }
 
   deleteQuestion(questionId: number) {
-    if (!confirm('Удалить вопрос?')) return;
-    this.courseService.deleteQuestion(questionId).subscribe(() => this.loadCourse());
+    this.dialog.open(ConfirmDialogComponent, {
+      data: { title: 'Удалить вопрос', message: 'Вопрос будет удалён безвозвратно.' }
+    }).afterClosed().subscribe(confirmed => {
+      if (confirmed) this.courseService.deleteQuestion(questionId).subscribe(() => this.loadCourse());
+    });
   }
 }

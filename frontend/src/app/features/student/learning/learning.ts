@@ -1,6 +1,8 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
+import { Subscription } from 'rxjs';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
@@ -24,7 +26,7 @@ import { CourseDetailResponse, LessonResponse, ProgressResponse, SectionResponse
   templateUrl: './learning.html',
   styleUrl: './learning.scss'
 })
-export class LearningComponent implements OnInit {
+export class LearningComponent implements OnInit, OnDestroy {
   courseId!: number;
   course!: CourseDetailResponse;
   loading = true;
@@ -35,18 +37,29 @@ export class LearningComponent implements OnInit {
   private returnLessonId: number | null = null;
   progress: ProgressResponse = { progressPercent: 0, completedLessonIds: [], passedQuizIds: [], completedAt: null };
 
+  isMobile = false;
+  sidenavOpened = true;
+  private bpSub!: Subscription;
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private courseService: CourseService,
     private sanitizer: DomSanitizer,
     private snack: MatSnackBar,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private breakpointObserver: BreakpointObserver
   ) {}
 
   ngOnInit() {
     this.courseId = Number(this.route.snapshot.paramMap.get('courseId'));
     this.returnLessonId = (history.state as any)?.lessonId ?? null;
+    this.bpSub = this.breakpointObserver.observe([Breakpoints.Handset, Breakpoints.TabletPortrait])
+      .subscribe(result => {
+        this.isMobile = result.matches;
+        this.sidenavOpened = !result.matches;
+        this.cdr.detectChanges();
+      });
     this.load();
   }
 
@@ -133,6 +146,10 @@ export class LearningComponent implements OnInit {
   formatDate(iso: string | null): string {
     if (!iso) return '';
     return new Date(iso).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  }
+
+  ngOnDestroy() {
+    this.bpSub.unsubscribe();
   }
 
   private toEmbedUrl(url: string): SafeResourceUrl {

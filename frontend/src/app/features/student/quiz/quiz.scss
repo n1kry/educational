@@ -55,3 +55,9 @@ h2 { margin: 0 0 8px; }
   vertical-align: middle;
   line-height: 1;
 }
+
+@media (max-width: 600px) {
+  .quiz-wrapper { padding: 8px 0; }
+  .result-wrapper { padding: 32px 16px; }
+  .submit-row { flex-direction: column; align-items: stretch; gap: 8px; }
+}
