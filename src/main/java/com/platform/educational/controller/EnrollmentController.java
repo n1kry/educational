@@ -19,7 +19,7 @@ public class EnrollmentController {
     private final EnrollmentService enrollmentService;
 
     @PostMapping("/{courseId}")
-    @PreAuthorize("hasRole('STUDENT')")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Void> enroll(@PathVariable Long courseId,
                                        @AuthenticationPrincipal User user) {
         enrollmentService.enroll(courseId, user);
@@ -27,13 +27,13 @@ public class EnrollmentController {
     }
 
     @GetMapping
-    @PreAuthorize("hasRole('STUDENT')")
+    @PreAuthorize("isAuthenticated()")
     public List<EnrollmentResponse> getMyEnrollments(@AuthenticationPrincipal User user) {
         return enrollmentService.getMyEnrollments(user);
     }
 
     @DeleteMapping("/{courseId}")
-    @PreAuthorize("hasRole('STUDENT')")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Void> unenroll(@PathVariable Long courseId,
                                          @AuthenticationPrincipal User user) {
         enrollmentService.unenroll(courseId, user);

@@ -63,25 +63,22 @@
 
   <mat-sidenav-content class="content">
     @if (activeLesson) {
-      <h2>{{ activeLesson.title }}</h2>
+      <div class="content-scroll">
+        <h2>{{ activeLesson.title }}</h2>
 
-      @if (activeLesson.description) {
-        <p class="lesson-desc">{{ activeLesson.description }}</p>
-      }
+        @if (activeLesson.description) {
+          <div class="lesson-desc" [innerHTML]="activeLesson.description"></div>
+        }
 
-      @if (safeUrl) {
-        <div class="video-wrapper">
-          <iframe [src]="safeUrl"
-                  allowfullscreen
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture">
-          </iframe>
-        </div>
-      } @else {
-        <div class="no-video">
-          <mat-icon>videocam_off</mat-icon>
-          <p>Видео для этого урока не добавлено</p>
-        </div>
-      }
+        @if (safeUrl) {
+          <div class="video-wrapper">
+            <iframe [src]="safeUrl"
+                    allowfullscreen
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture">
+            </iframe>
+          </div>
+        }
+      </div>
 
       <div class="lesson-actions">
         @if (isCompleted(activeLesson.id)) {

@@ -53,12 +53,13 @@ export class CourseDetailComponent implements OnInit {
     });
   }
 
-  get isStudent(): boolean {
-    return this.auth.role() === 'STUDENT';
+  get canEnroll(): boolean {
+    if (!this.auth.isLoggedIn()) return false;
+    return this.course?.teacherId !== this.auth.userId();
   }
 
   private checkEnrollment() {
-    if (!this.isStudent) return;
+    if (!this.auth.isLoggedIn()) return;
     this.courseService.getMyEnrollments().subscribe({
       next: list => {
         const entry = list.find(e => e.courseId === this.courseId);

@@ -9,6 +9,7 @@ import java.util.List;
 public class SectionResponse {
     private Long id;
     private String title;
+    private String description;
     private int position;
     private List<LessonResponse> lessons;
     private QuizResponse quiz;

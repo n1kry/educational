@@ -16,13 +16,19 @@
         <p class="score">Ваш результат: <strong>{{ result.score }}%</strong></p>
         <p class="message">{{ result.message }}</p>
       </mat-card-content>
-      <mat-card-actions>
-        <button mat-button (click)="back()">
-          <mat-icon>arrow_back</mat-icon> Вернуться к курсу
-        </button>
+      <mat-card-actions style="display:flex; justify-content:center">
         @if (!result.passed) {
           <button mat-flat-button (click)="result = null; answers = {}">
             <mat-icon>refresh</mat-icon> Попробовать снова
+          </button>
+        }
+        @if (result.passed && nextLessonId) {
+          <button mat-flat-button (click)="continueToNext()">
+            Следующая тема <mat-icon>arrow_forward</mat-icon>
+          </button>
+        } @else {
+          <button mat-button (click)="back()">
+            <mat-icon>arrow_back</mat-icon> Вернуться к курсу
           </button>
         }
       </mat-card-actions>

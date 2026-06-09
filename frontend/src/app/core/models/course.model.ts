@@ -7,6 +7,7 @@ export interface CourseRequest {
 
 export interface SectionRequest {
   title: string;
+  description: string;
   position: number;
 }
 
@@ -46,6 +47,7 @@ export interface CourseResponse {
   category: string;
   thumbnailUrl: string;
   published: boolean;
+  teacherId: number;
   teacherName: string;
   sectionCount: number;
 }
@@ -67,6 +69,7 @@ export interface OptionResponse {
 export interface QuestionResponse {
   id: number;
   text: string;
+  correctAnswer: string;
   options: OptionResponse[];
 }
 
@@ -81,6 +84,7 @@ export interface QuizResponse {
 export interface SectionResponse {
   id: number;
   title: string;
+  description: string;
   position: number;
   lessons: LessonResponse[];
   quiz: QuizResponse | null;
@@ -93,6 +97,7 @@ export interface CourseDetailResponse {
   category: string;
   thumbnailUrl: string;
   published: boolean;
+  teacherId: number;
   teacherName: string;
   sections: SectionResponse[];
   finalQuiz: QuizResponse | null;
@@ -131,4 +136,5 @@ export interface UserResponse {
   role: string;
   active: boolean;
   createdAt: string;
+  requestedTeacher: boolean;
 }

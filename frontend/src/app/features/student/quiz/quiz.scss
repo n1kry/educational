@@ -49,3 +49,9 @@ h2 { margin: 0 0 8px; }
 .answered-info {
   font-size: 14px; color: var(--mat-sys-on-surface-variant);
 }
+
+.submit-row button mat-icon,
+.submit-row button .mat-icon {
+  vertical-align: middle;
+  line-height: 1;
+}

@@ -4,11 +4,12 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatBadgeModule } from '@angular/material/badge';
 import { FormsModule } from '@angular/forms';
 import { AdminService } from '../../../core/services/admin.service';
+import { AuthService } from '../../../core/services/auth.service';
 import { UserResponse } from '../../../core/models/course.model';
 
 @Component({
@@ -17,7 +18,8 @@ import { UserResponse } from '../../../core/models/course.model';
   imports: [
     FormsModule,
     MatTableModule, MatButtonModule, MatIconModule, MatChipsModule,
-    MatProgressSpinnerModule, MatSelectModule, MatSnackBarModule, MatTooltipModule
+    MatProgressSpinnerModule, MatSnackBarModule,
+    MatTooltipModule, MatBadgeModule
   ],
   templateUrl: './admin-users.html',
   styleUrl: './admin-users.scss'
@@ -25,18 +27,27 @@ import { UserResponse } from '../../../core/models/course.model';
 export class AdminUsersComponent implements OnInit {
   users: UserResponse[] = [];
   loading = true;
-  displayedColumns = ['id', 'name', 'email', 'role', 'status', 'actions'];
+  displayedColumns = ['id', 'name', 'email', 'role', 'status', 'teacher-request', 'actions'];
   roles = ['STUDENT', 'TEACHER', 'ADMIN'];
 
   constructor(
     private adminService: AdminService,
+    private auth: AuthService,
     private snack: MatSnackBar,
     private cdr: ChangeDetectorRef
   ) {}
 
-  ngOnInit() {
-    this.load();
+  get currentUserId(): number | null { return this.auth.userId(); }
+
+  get pendingTeacherCount(): number {
+    return this.users.filter(u => u.requestedTeacher).length;
   }
+
+  isSelf(user: UserResponse): boolean {
+    return user.id === this.currentUserId;
+  }
+
+  ngOnInit() { this.load(); }
 
   load() {
     this.adminService.getUsers().subscribe({
@@ -60,6 +71,27 @@ export class AdminUsersComponent implements OnInit {
       next: () => {
         user.role = role;
         this.snack.open('Роль изменена', '', { duration: 2000 });
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  approveTeacher(user: UserResponse) {
+    this.adminService.approveTeacher(user.id).subscribe({
+      next: () => {
+        user.role = 'TEACHER';
+        user.requestedTeacher = false;
+        this.snack.open(`${user.name} — роль TEACHER подтверждена`, '', { duration: 3000 });
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  denyTeacher(user: UserResponse) {
+    this.adminService.denyTeacher(user.id).subscribe({
+      next: () => {
+        user.requestedTeacher = false;
+        this.snack.open(`${user.name} — запрос отклонён`, '', { duration: 2000 });
         this.cdr.detectChanges();
       }
     });

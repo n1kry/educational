@@ -5,7 +5,8 @@
   align-items: center;
   gap: 8px;
   margin-bottom: 24px;
-  h2 { margin: 0; flex: 1; }
+  min-width: 0;
+  h2 { margin: 0; flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 }
 .spacer { flex: 1; }
 
@@ -45,7 +46,7 @@
 }
 .lesson-icon { color: var(--mat-sys-primary); font-size: 20px; }
 .lesson-title { flex: 1; font-size: 14px; }
-.lesson-meta  { font-size: 12px; color: var(--mat-sys-on-surface-variant); }
+.lesson-meta { font-size: 12px; color: var(--mat-sys-on-surface-variant); }
 
 .inline-form {
   background: var(--mat-sys-surface-variant);
@@ -93,11 +94,38 @@
   color: var(--mat-sys-primary);
 }
 
-.add-section {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  mat-form-field { flex: 1; }
+.add-section-wrap {
+  padding: 16px;
+  background: var(--mat-sys-surface-container-low);
+  border-radius: 8px;
+}
+.add-section-title {
+  margin: 0 0 12px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.editor-label {
+  font-size: 12px;
+  color: var(--mat-sys-on-surface-variant);
+  margin-bottom: 6px;
+  margin-top: 4px;
+}
+.editor-field {
+  display: block;
+  width: 100%;
+  margin-bottom: 4px;
+}
+
+.edit-form {
+  border: 1px solid var(--mat-sys-primary);
+  background: var(--mat-sys-primary-container);
+  border-radius: 8px;
+}
+
+.quiz-header {
+  button[mat-icon-button] { margin-left: auto; }
 }
 
 .panel-actions {

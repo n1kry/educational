@@ -12,8 +12,11 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatDialogModule } from '@angular/material/dialog';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { QuillModule } from 'ngx-quill';
+import { QUILL_MODULES } from '../../../shared/quill-config';
 import { CourseService } from '../../../core/services/course.service';
-import { CourseDetailResponse } from '../../../core/models/course.model';
+import { CourseDetailResponse, QuestionResponse, QuizResponse, SectionResponse, LessonResponse } from '../../../core/models/course.model';
 
 @Component({
   selector: 'app-edit-course',
@@ -22,7 +25,8 @@ import { CourseDetailResponse } from '../../../core/models/course.model';
     ReactiveFormsModule, RouterLink,
     MatCardModule, MatFormFieldModule, MatInputModule, MatButtonModule,
     MatIconModule, MatExpansionModule, MatDividerModule,
-    MatProgressSpinnerModule, MatSelectModule, MatSnackBarModule, MatDialogModule
+    MatProgressSpinnerModule, MatSelectModule, MatSnackBarModule, MatDialogModule,
+    MatTooltipModule, QuillModule
   ],
   templateUrl: './edit-course.html',
   styleUrl: './edit-course.scss'
@@ -44,7 +48,20 @@ export class EditCourseComponent implements OnInit {
   addingQuestionForQuiz: number | null = null;
   questionForm!: FormGroup;
 
+  editingSection: number | null = null;
+  editingSectionForm!: FormGroup;
+
+  editingLesson: number | null = null;
+  editingLessonForm!: FormGroup;
+
+  editingQuiz: number | null = null;
+  editingQuizForm!: FormGroup;
+
+  editingQuestion: number | null = null;
+  editingQuestionForm!: FormGroup;
+
   categories = ['Программирование', 'Дизайн', 'Бизнес', 'Математика', 'Языки', 'Другое'];
+  quillModules = QUILL_MODULES;
 
   constructor(
     private route: ActivatedRoute,
@@ -64,12 +81,13 @@ export class EditCourseComponent implements OnInit {
     this.courseForm = this.fb.group({
       title:        ['', Validators.required],
       description:  [''],
-      category:     [''],
+      category:     ['', Validators.required],
       thumbnailUrl: ['']
     });
     this.sectionForm = this.fb.group({
-      title:    ['', Validators.required],
-      position: [1]
+      title:       ['', Validators.required],
+      description: [''],
+      position:    [1]
     });
     this.lessonForm = this.fb.group({
       title:           ['', Validators.required],
@@ -92,10 +110,39 @@ export class EditCourseComponent implements OnInit {
         this.fb.group({ optionKey: ['D'], text: ['', Validators.required] })
       ])
     });
+
+    this.editingSectionForm = this.fb.group({
+      title:       ['', Validators.required],
+      description: [''],
+      position:    [1]
+    });
+    this.editingLessonForm = this.fb.group({
+      title:           ['', Validators.required],
+      description:     [''],
+      videoUrl:        [''],
+      durationMinutes: [null],
+      position:        [1]
+    });
+    this.editingQuizForm = this.fb.group({
+      title:        ['', Validators.required],
+      passingScore: [70, [Validators.min(1), Validators.max(100)]]
+    });
+    this.editingQuestionForm = this.fb.group({
+      text:          ['', Validators.required],
+      correctAnswer: ['A', Validators.required],
+      options: this.fb.array([
+        this.fb.group({ optionKey: ['A'], text: ['', Validators.required] }),
+        this.fb.group({ optionKey: ['B'], text: ['', Validators.required] }),
+        this.fb.group({ optionKey: ['C'], text: ['', Validators.required] }),
+        this.fb.group({ optionKey: ['D'], text: ['', Validators.required] })
+      ])
+    });
   }
 
   get questionOptions(): FormArray { return this.questionForm.get('options') as FormArray; }
+  get editingQuestionOptions(): FormArray { return this.editingQuestionForm.get('options') as FormArray; }
   getOptionControls(): AbstractControl[] { return this.questionOptions.controls; }
+  getEditingOptionControls(): AbstractControl[] { return this.editingQuestionOptions.controls; }
 
   loadCourse() {
     this.loading = true;
@@ -134,7 +181,26 @@ export class EditCourseComponent implements OnInit {
     if (this.sectionForm.invalid) return;
     const pos = this.course.sections.length + 1;
     this.courseService.createSection(this.courseId, { ...this.sectionForm.value, position: pos })
-      .subscribe(() => { this.sectionForm.reset({ position: 1 }); this.loadCourse(); });
+      .subscribe(() => { this.sectionForm.reset({ title: '', description: '', position: 1 }); this.loadCourse(); });
+  }
+
+  showEditSection(section: SectionResponse) {
+    this.editingSection = section.id;
+    this.editingSectionForm.patchValue({
+      title: section.title,
+      description: section.description,
+      position: section.position
+    });
+    this.cdr.detectChanges();
+  }
+
+  saveSection() {
+    if (this.editingSectionForm.invalid || !this.editingSection) return;
+    this.courseService.updateSection(this.editingSection, this.editingSectionForm.value).subscribe(() => {
+      this.editingSection = null;
+      this.snack.open('Раздел сохранён', '', { duration: 2000 });
+      this.loadCourse();
+    });
   }
 
   deleteSection(sectionId: number) {
@@ -145,13 +211,34 @@ export class EditCourseComponent implements OnInit {
   showAddLesson(sectionId: number) {
     this.addingLessonForSection = sectionId;
     const section = this.course.sections.find(s => s.id === sectionId)!;
-    this.lessonForm.reset({ position: section.lessons.length + 1 });
+    this.lessonForm.reset({ title: '', description: '', videoUrl: '', durationMinutes: null, position: section.lessons.length + 1 });
   }
 
   addLesson(sectionId: number) {
     if (this.lessonForm.invalid) return;
     this.courseService.createLesson(sectionId, this.lessonForm.value).subscribe(() => {
       this.addingLessonForSection = null;
+      this.loadCourse();
+    });
+  }
+
+  showEditLesson(lesson: LessonResponse) {
+    this.editingLesson = lesson.id;
+    this.editingLessonForm.patchValue({
+      title: lesson.title,
+      description: lesson.description,
+      videoUrl: lesson.videoUrl,
+      durationMinutes: lesson.durationMinutes,
+      position: lesson.position
+    });
+    this.cdr.detectChanges();
+  }
+
+  saveLesson() {
+    if (this.editingLessonForm.invalid || !this.editingLesson) return;
+    this.courseService.updateLesson(this.editingLesson, this.editingLessonForm.value).subscribe(() => {
+      this.editingLesson = null;
+      this.snack.open('Урок сохранён', '', { duration: 2000 });
       this.loadCourse();
     });
   }
@@ -174,6 +261,20 @@ export class EditCourseComponent implements OnInit {
     });
   }
 
+  showEditQuiz(quiz: QuizResponse) {
+    this.editingQuiz = quiz.id;
+    this.editingQuizForm.patchValue({ title: quiz.title, passingScore: quiz.passingScore });
+  }
+
+  saveQuiz() {
+    if (this.editingQuizForm.invalid || !this.editingQuiz) return;
+    this.courseService.updateQuiz(this.editingQuiz, this.editingQuizForm.value).subscribe(() => {
+      this.editingQuiz = null;
+      this.snack.open('Тест сохранён', '', { duration: 2000 });
+      this.loadCourse();
+    });
+  }
+
   showAddQuestion(quizId: number) {
     this.addingQuestionForQuiz = quizId;
     this.questionForm.reset({
@@ -191,6 +292,26 @@ export class EditCourseComponent implements OnInit {
     if (this.questionForm.invalid) return;
     this.courseService.addQuestion(quizId, this.questionForm.value).subscribe(() => {
       this.addingQuestionForQuiz = null;
+      this.loadCourse();
+    });
+  }
+
+  showEditQuestion(q: QuestionResponse) {
+    this.editingQuestion = q.id;
+    this.editingQuestionForm.patchValue({ text: q.text, correctAnswer: q.correctAnswer });
+    const arr = this.editingQuestionOptions;
+    arr.controls.forEach((ctrl, i) => {
+      const opt = q.options[i];
+      if (opt) ctrl.patchValue({ optionKey: opt.optionKey, text: opt.text });
+    });
+    this.cdr.detectChanges();
+  }
+
+  saveQuestion() {
+    if (this.editingQuestionForm.invalid || !this.editingQuestion) return;
+    this.courseService.updateQuestion(this.editingQuestion, this.editingQuestionForm.value).subscribe(() => {
+      this.editingQuestion = null;
+      this.snack.open('Вопрос сохранён', '', { duration: 2000 });
       this.loadCourse();
     });
   }

@@ -60,7 +60,9 @@
           @if (e.thumbnailUrl) {
             <img mat-card-image [src]="e.thumbnailUrl" [alt]="e.courseTitle" class="thumb">
           } @else {
-            <div class="thumb-placeholder"></div>
+            <div mat-card-image class="thumb-placeholder">
+              <mat-icon>school</mat-icon>
+            </div>
           }
           @if (isUpdatedAfterCompletion(e)) {
             <div class="updated-overlay">
@@ -71,34 +73,36 @@
         </div>
 
         <mat-card-header>
-          <mat-card-title>{{ e.courseTitle }}</mat-card-title>
-          <mat-card-subtitle>
-            @if (e.completedAt) {
-              <span class="completed-badge">
-                <mat-icon inline>school</mat-icon> Завершён {{ formatDate(e.completedAt) }}
-              </span>
-            } @else {
-              {{ e.category }} · Прогресс: {{ e.progressPercent }}%
-            }
-          </mat-card-subtitle>
+          <mat-card-title><span class="title-clamp" [matTooltip]="e.courseTitle" matTooltipShowDelay="600">{{ e.courseTitle }}</span></mat-card-title>
         </mat-card-header>
 
-        <mat-card-content class="card-body">
+        <mat-card-content class="card-body"></mat-card-content>
+
+        <div class="card-bottom">
+          <div class="card-meta">
+            @if (e.completedAt) {
+              <span class="completed-badge">
+                <mat-icon>school</mat-icon> Завершён {{ formatDate(e.completedAt) }}
+              </span>
+            } @else {
+              <span class="meta-text">{{ e.category }} · Прогресс: {{ e.progressPercent }}%</span>
+            }
+          </div>
           <mat-progress-bar mode="determinate" [value]="e.progressPercent"
             [color]="e.completedAt ? 'accent' : 'primary'" />
-        </mat-card-content>
-
-        <mat-card-actions class="card-actions">
-          <button mat-flat-button (click)="$event.stopPropagation(); go(e.courseId)">
-            <mat-icon>{{ e.completedAt ? 'replay' : 'play_arrow' }}</mat-icon>
-            {{ e.completedAt ? 'Просмотреть снова' : (e.progressPercent === 0 ? 'Начать' : 'Продолжить') }}
-          </button>
-          <button mat-icon-button class="unenroll-btn"
-            matTooltip="Отписаться от курса"
-            (click)="unenroll(e, $event)">
-            <mat-icon>logout</mat-icon>
-          </button>
-        </mat-card-actions>
+          <mat-card-actions class="card-actions">
+            <button mat-flat-button (click)="$event.stopPropagation(); go(e.courseId)">
+              <mat-icon>{{ e.completedAt ? 'replay' : 'play_arrow' }}</mat-icon>
+              {{ e.completedAt ? 'Просмотреть снова' : (e.progressPercent === 0 ? 'Начать' : 'Продолжить') }}
+            </button>
+            <button mat-icon-button class="unenroll-btn"
+              style="margin-left: auto"
+              matTooltip="Отписаться от курса"
+              (click)="unenroll(e, $event)">
+              <mat-icon>logout</mat-icon>
+            </button>
+          </mat-card-actions>
+        </div>
       </mat-card>
     }
   </div>

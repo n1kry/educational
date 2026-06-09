@@ -30,6 +30,20 @@
           }
         </mat-form-field>
 
+        <div class="teacher-request" [class.selected]="form.get('requestedTeacher')?.value">
+          <mat-checkbox formControlName="requestedTeacher">
+            <span class="teacher-request-label">
+              <mat-icon>school</mat-icon>
+              Хочу стать преподавателем
+            </span>
+          </mat-checkbox>
+          @if (form.get('requestedTeacher')?.value) {
+            <p class="teacher-request-hint">
+              Вы будете зарегистрированы как студент. Администратор рассмотрит ваш запрос и повысит роль до преподавателя.
+            </p>
+          }
+        </div>
+
         @if (error) {
           <p class="error-msg">{{ error }}</p>
         }

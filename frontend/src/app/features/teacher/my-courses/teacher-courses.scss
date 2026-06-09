@@ -22,12 +22,28 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: 24px;
+  align-items: stretch;
 }
 
 .course-card {
-  display: flex;
-  flex-direction: column;
+  display: flex !important;
+  flex-direction: column !important;
+  height: 100%;
+  box-sizing: border-box;
   img { height: 160px; object-fit: cover; }
+
+  ::ng-deep .mat-mdc-card-header-text { min-width: 0; overflow: hidden; }
+
+
+  mat-card-content { flex: 1; }
+
+  mat-card-actions {
+    margin-top: auto !important;
+    display: flex !important;
+    align-items: center;
+
+    .delete-btn { margin-left: auto; }
+  }
 }
 
 .description {
@@ -40,4 +56,4 @@
 }
 
 .chip-published { background: #e8f5e9; color: #2e7d32; }
-.chip-draft     { background: #fff3e0; color: #e65100; }
+.chip-draft { background: #fff3e0; color: #e65100; }

@@ -33,6 +33,7 @@ export class LearningComponent implements OnInit {
   activeLesson: LessonResponse | null = null;
   safeUrl: SafeResourceUrl | null = null;
   completing = false;
+  private returnLessonId: number | null = null;
 
   constructor(
     private route: ActivatedRoute,
@@ -45,6 +46,7 @@ export class LearningComponent implements OnInit {
 
   ngOnInit() {
     this.courseId = Number(this.route.snapshot.paramMap.get('courseId'));
+    this.returnLessonId = (history.state as any)?.lessonId ?? null;
     this.load();
   }
 
@@ -56,8 +58,12 @@ export class LearningComponent implements OnInit {
         this.courseService.getProgress(this.courseId).subscribe({
           next: p => {
             this.progress = p;
-            if (!this.activeLesson && course.sections[0]?.lessons[0]) {
-              this.selectLesson(course.sections[0].lessons[0]);
+            if (!this.activeLesson) {
+              const target = this.returnLessonId
+                ? course.sections.flatMap(s => s.lessons).find(l => l.id === this.returnLessonId)
+                : null;
+              this.selectLesson(target ?? course.sections[0]?.lessons[0]);
+              this.returnLessonId = null;
             }
             this.loading = false;
             this.cdr.detectChanges();
@@ -69,7 +75,8 @@ export class LearningComponent implements OnInit {
     });
   }
 
-  selectLesson(lesson: LessonResponse) {
+  selectLesson(lesson: LessonResponse | undefined) {
+    if (!lesson) return;
     this.activeLesson = lesson;
     this.safeUrl = lesson.videoUrl ? this.toEmbedUrl(lesson.videoUrl) : null;
     this.cdr.detectChanges();
@@ -106,7 +113,14 @@ export class LearningComponent implements OnInit {
 
   goQuiz(quizId: number) {
     const quiz = this.findQuizById(quizId);
-    this.router.navigate(['/quiz', quizId], { state: { quiz, courseId: this.courseId } });
+    const sectionIdx = this.course.sections.findIndex(s => s.quiz?.id === quizId);
+    const section = sectionIdx >= 0 ? this.course.sections[sectionIdx] : null;
+    const lastLessonId = section?.lessons.at(-1)?.id ?? null;
+    const nextSection = sectionIdx >= 0 ? this.course.sections[sectionIdx + 1] : null;
+    const nextLessonId = nextSection?.lessons[0]?.id ?? null;
+    this.router.navigate(['/quiz', quizId], {
+      state: { quiz, courseId: this.courseId, lastLessonId, nextLessonId }
+    });
   }
 
   private findQuizById(quizId: number) {

@@ -29,6 +29,9 @@ public class EnrollmentService {
         }
         Course course = courseRepository.findById(courseId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Course not found"));
+        if (course.getTeacher().getId().equals(student.getId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Cannot enroll in your own course");
+        }
 
         enrollmentRepository.save(Enrollment.builder()
                 .student(student)

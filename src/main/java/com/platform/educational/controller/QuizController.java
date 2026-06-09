@@ -42,6 +42,24 @@ public class QuizController {
         return ResponseEntity.status(HttpStatus.CREATED).body(courseService.toQuizResponse(quiz));
     }
 
+    @PutMapping("/quizzes/{quizId}")
+    @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
+    public ResponseEntity<Object> updateQuiz(@PathVariable Long quizId,
+                                              @Valid @RequestBody QuizRequest req,
+                                              @AuthenticationPrincipal User user) {
+        var quiz = quizService.updateQuiz(quizId, req, user);
+        return ResponseEntity.ok(courseService.toQuizResponse(quiz));
+    }
+
+    @PutMapping("/questions/{questionId}")
+    @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
+    public ResponseEntity<Void> updateQuestion(@PathVariable Long questionId,
+                                               @Valid @RequestBody QuestionRequest req,
+                                               @AuthenticationPrincipal User user) {
+        quizService.updateQuestion(questionId, req, user);
+        return ResponseEntity.ok().build();
+    }
+
     @PostMapping("/quizzes/{quizId}/questions")
     @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
     public ResponseEntity<Void> addQuestion(@PathVariable Long quizId,
@@ -60,7 +78,7 @@ public class QuizController {
     }
 
     @PostMapping("/quizzes/submit")
-    @PreAuthorize("hasRole('STUDENT')")
+    @PreAuthorize("isAuthenticated()")
     public QuizResultResponse submitQuiz(@RequestBody QuizSubmitRequest req,
                                          @AuthenticationPrincipal User user) {
         return quizService.submitQuiz(req, user);

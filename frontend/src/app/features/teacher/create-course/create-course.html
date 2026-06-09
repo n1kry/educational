@@ -15,10 +15,8 @@
         }
       </mat-form-field>
 
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Описание</mat-label>
-        <textarea matInput formControlName="description" rows="4"></textarea>
-      </mat-form-field>
+      <div class="editor-label">Описание</div>
+      <quill-editor formControlName="description" [modules]="quillModules" placeholder="Введите описание курса..." class="editor-field"></quill-editor>
 
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Категория</mat-label>
@@ -27,6 +25,9 @@
             <mat-option [value]="cat">{{ cat }}</mat-option>
           }
         </mat-select>
+        @if (form.get('category')?.hasError('required') && form.get('category')?.touched) {
+          <mat-error>Выберите категорию</mat-error>
+        }
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="full-width">

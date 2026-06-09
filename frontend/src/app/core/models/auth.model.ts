@@ -7,9 +7,11 @@ export interface RegisterRequest {
   name: string;
   email: string;
   password: string;
+  requestedTeacher: boolean;
 }
 
 export interface AuthResponse {
+  id: number;
   token: string;
   name: string;
   email: string;

@@ -37,3 +37,78 @@ body {
   height: 100%;
 }
 /* You can add global styles to this file, and also import other style files */
+
+.ql-font-arial { font-family: Arial, sans-serif; }
+.ql-font-times-new-roman { font-family: 'Times New Roman', serif; }
+.ql-font-courier-new { font-family: 'Courier New', monospace; }
+.ql-font-serif { font-family: Georgia, serif; }
+.ql-font-monospace { font-family: 'Courier New', monospace; }
+
+.ql-snow .ql-picker.ql-font .ql-picker-label[data-value='arial']::before,
+.ql-snow .ql-picker.ql-font .ql-picker-item[data-value='arial']::before { content: 'Arial'; font-family: Arial, sans-serif; }
+.ql-snow .ql-picker.ql-font .ql-picker-label[data-value='times-new-roman']::before,
+.ql-snow .ql-picker.ql-font .ql-picker-item[data-value='times-new-roman']::before { content: 'Times New Roman'; font-family: 'Times New Roman', serif; }
+.ql-snow .ql-picker.ql-font .ql-picker-label[data-value='courier-new']::before,
+.ql-snow .ql-picker.ql-font .ql-picker-item[data-value='courier-new']::before { content: 'Courier New'; font-family: 'Courier New', monospace; }
+.ql-snow .ql-picker.ql-font .ql-picker-label[data-value='serif']::before,
+.ql-snow .ql-picker.ql-font .ql-picker-item[data-value='serif']::before { content: 'Serif'; }
+.ql-snow .ql-picker.ql-font .ql-picker-label[data-value='monospace']::before,
+.ql-snow .ql-picker.ql-font .ql-picker-item[data-value='monospace']::before { content: 'Monospace'; }
+
+.description,
+.lesson-desc {
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+
+  p { margin: 0 0 0.75em; }
+  h1, h2, h3 { margin: 1em 0 0.4em; font-weight: 600; }
+  h1 { font-size: 1.6em; }
+  h2 { font-size: 1.35em; }
+  h3 { font-size: 1.15em; }
+
+  strong { font-weight: 700; }
+  em { font-style: italic; }
+  u { text-decoration: underline; }
+  s { text-decoration: line-through; }
+
+  ul, ol { margin: 0 0 0.75em 1.5em; padding: 0; }
+  li { margin-bottom: 0.25em; }
+
+  blockquote {
+    border-left: 4px solid var(--mat-sys-outline-variant);
+    margin: 0.75em 0;
+    padding: 0.4em 1em;
+    color: var(--mat-sys-on-surface-variant);
+  }
+
+  pre {
+    background: var(--mat-sys-surface-container);
+    border-radius: 4px;
+    padding: 0.75em 1em;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9em;
+    overflow-x: auto;
+    margin: 0.75em 0;
+  }
+
+  a { color: var(--mat-sys-primary); text-decoration: underline; }
+
+  img { max-width: 100%; height: auto; border-radius: 4px; display: block; margin: 0.5em 0; }
+
+  .ql-align-center { text-align: center; }
+  .ql-align-right { text-align: right; }
+  .ql-align-justify { text-align: justify; }
+
+  .ql-size-small { font-size: 0.75em; }
+  .ql-size-large { font-size: 1.5em; }
+  .ql-size-huge { font-size: 2em; }
+}
+
+.title-clamp {
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}

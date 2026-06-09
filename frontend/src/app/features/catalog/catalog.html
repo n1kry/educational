@@ -22,10 +22,17 @@
       </mat-select>
     </mat-form-field>
 
-    @if (isStudent) {
+    @if (isLoggedIn) {
       <div class="filter-checkbox">
         <mat-checkbox [(ngModel)]="hideEnrolled" (ngModelChange)="applyFilter()">
-          Скрыть записанные
+          Скрыть подписки
+        </mat-checkbox>
+      </div>
+    }
+    @if (canCreateCourses) {
+      <div class="filter-checkbox">
+        <mat-checkbox [(ngModel)]="hideOwn" (ngModelChange)="applyFilter()">
+          Скрыть мои курсы
         </mat-checkbox>
       </div>
     }
@@ -40,7 +47,7 @@
     <p>Курсы не найдены</p>
     @if (hideEnrolled && enrolledIds.size > 0) {
       <button mat-button (click)="hideEnrolled = false; applyFilter()">
-        Показать записанные
+        Показать все
       </button>
     }
   </div>
@@ -51,26 +58,45 @@
         @if (course.thumbnailUrl) {
           <img mat-card-image [src]="course.thumbnailUrl" [alt]="course.title" class="thumb">
         } @else {
-          <div class="thumb-placeholder">
+          <div mat-card-image class="thumb-placeholder">
             <mat-icon>school</mat-icon>
           </div>
         }
         <mat-card-header>
-          <mat-card-title>{{ course.title }}</mat-card-title>
+          <mat-card-title><span class="title-clamp" [matTooltip]="course.title" matTooltipShowDelay="600">{{ course.title }}</span></mat-card-title>
           <mat-card-subtitle>{{ course.teacherName }}</mat-card-subtitle>
         </mat-card-header>
-        <mat-card-content>
-          <p class="description">{{ course.description }}</p>
+
+        <mat-card-content class="card-body">
+          <p class="description">{{ plainText(course.description) | slice:0:160 }}{{ plainText(course.description).length > 160 ? '…' : '' }}</p>
+        </mat-card-content>
+
+        <div class="card-footer">
           <div class="meta">
             <mat-chip>{{ course.category }}</mat-chip>
             <span class="sections">{{ course.sectionCount }} разделов</span>
           </div>
-        </mat-card-content>
-        <mat-card-actions>
-          <button mat-flat-button (click)="$event.stopPropagation(); open(course.id)">
-            Подробнее
-          </button>
-        </mat-card-actions>
+          <mat-card-actions>
+            <button mat-stroked-button (click)="$event.stopPropagation(); open(course.id)">
+              Подробнее
+            </button>
+            @if (canEnroll(course) && !enrolledIds.has(course.id)) {
+              <button mat-flat-button
+                      [disabled]="enrolling.has(course.id)"
+                      (click)="enroll(course, $event)">
+                @if (enrolling.has(course.id)) {
+                  <mat-spinner diameter="16" />
+                } @else {
+                  Записаться
+                }
+              </button>
+            } @else if (canEnroll(course) && enrolledIds.has(course.id)) {
+              <button mat-button disabled class="enrolled-btn">
+                <mat-icon>check</mat-icon> Записан
+              </button>
+            }
+          </mat-card-actions>
+        </div>
       </mat-card>
     }
   </div>

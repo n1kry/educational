@@ -31,6 +31,10 @@ export class QuizComponent implements OnInit {
   result: QuizResultResponse | null = null;
   objectKeys = Object.keys;
 
+  private courseId: number | null = null;
+  private lastLessonId: number | null = null;
+  nextLessonId: number | null = null;
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -45,15 +49,15 @@ export class QuizComponent implements OnInit {
   }
 
   private loadQuiz() {
-    const state = history.state as { quiz?: QuizResponse; courseId?: number };
+    const state = history.state as { quiz?: QuizResponse; courseId?: number; lastLessonId?: number; nextLessonId?: number };
+    this.courseId = state?.courseId ?? null;
+    this.lastLessonId = state?.lastLessonId ?? null;
+    this.nextLessonId = state?.nextLessonId ?? null;
     if (state?.quiz) {
       this.quiz = state.quiz;
-      this.loading = false;
-      this.cdr.detectChanges();
-    } else {
-      this.loading = false;
-      this.cdr.detectChanges();
     }
+    this.loading = false;
+    this.cdr.detectChanges();
   }
 
   allAnswered(): boolean {
@@ -75,7 +79,19 @@ export class QuizComponent implements OnInit {
   }
 
   back() {
-    const courseId = (history.state as any)?.courseId;
-    this.router.navigate(courseId ? ['/learn', courseId] : ['/my-courses']);
+    if (this.courseId) {
+      this.router.navigate(['/learn', this.courseId],
+        this.lastLessonId ? { state: { lessonId: this.lastLessonId } } : {});
+    } else {
+      this.router.navigate(['/my-courses']);
+    }
+  }
+
+  continueToNext() {
+    if (this.courseId && this.nextLessonId) {
+      this.router.navigate(['/learn', this.courseId], { state: { lessonId: this.nextLessonId } });
+    } else {
+      this.back();
+    }
   }
 }

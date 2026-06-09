@@ -89,6 +89,7 @@ public class CourseService {
         Section section = Section.builder()
                 .course(course)
                 .title(req.getTitle())
+                .description(req.getDescription())
                 .position(req.getPosition())
                 .build();
         sectionRepository.save(section);
@@ -101,6 +102,7 @@ public class CourseService {
         Section section = findSectionOrThrow(sectionId);
         checkCourseOwnership(section.getCourse(), user);
         section.setTitle(req.getTitle());
+        section.setDescription(req.getDescription());
         section.setPosition(req.getPosition());
         sectionRepository.save(section);
         touchContent(section.getCourse());
@@ -164,6 +166,7 @@ public class CourseService {
                 .category(c.getCategory())
                 .thumbnailUrl(c.getThumbnailUrl())
                 .published(c.isPublished())
+                .teacherId(c.getTeacher().getId())
                 .teacherName(c.getTeacher().getName())
                 .sectionCount(c.getSections().size())
                 .build();
@@ -184,6 +187,7 @@ public class CourseService {
                 .category(course.getCategory())
                 .thumbnailUrl(course.getThumbnailUrl())
                 .published(course.isPublished())
+                .teacherId(course.getTeacher().getId())
                 .teacherName(course.getTeacher().getName())
                 .sections(sections)
                 .finalQuiz(finalQuiz)
@@ -197,6 +201,7 @@ public class CourseService {
         return SectionResponse.builder()
                 .id(s.getId())
                 .title(s.getTitle())
+                .description(s.getDescription())
                 .position(s.getPosition())
                 .lessons(lessons)
                 .quiz(quiz)
@@ -219,6 +224,7 @@ public class CourseService {
                 .map(question -> com.platform.educational.dto.response.QuestionResponse.builder()
                         .id(question.getId())
                         .text(question.getText())
+                        .correctAnswer(question.getCorrectAnswer())
                         .options(question.getOptions().stream()
                                 .map(o -> com.platform.educational.dto.response.QuestionResponse.OptionResponse.builder()
                                         .optionKey(o.getOptionKey())

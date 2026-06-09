@@ -11,6 +11,7 @@ public class CourseResponse {
     private String category;
     private String thumbnailUrl;
     private boolean published;
+    private Long teacherId;
     private String teacherName;
     private int sectionCount;
 }

@@ -3,12 +3,14 @@ package com.platform.educational.controller;
 import com.platform.educational.dto.response.CourseResponse;
 import com.platform.educational.dto.response.UserResponse;
 import com.platform.educational.entity.User;
+import com.platform.educational.entity.enums.Role;
 import com.platform.educational.repository.UserRepository;
 import com.platform.educational.service.CourseService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -31,23 +33,55 @@ public class AdminController {
     }
 
     @PatchMapping("/users/{id}/toggle-active")
-    public ResponseEntity<Void> toggleActive(@PathVariable Long id) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+    public ResponseEntity<Void> toggleActive(@PathVariable Long id,
+                                             @AuthenticationPrincipal User currentUser) {
+        if (id.equals(currentUser.getId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Cannot modify your own account");
+        }
+        User user = findUserOrThrow(id);
         user.setActive(!user.isActive());
         userRepository.save(user);
         return ResponseEntity.ok().build();
     }
 
     @PatchMapping("/users/{id}/role")
-    public ResponseEntity<Void> changeRole(@PathVariable Long id, @RequestParam String role) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+    public ResponseEntity<Void> changeRole(@PathVariable Long id,
+                                           @RequestParam String role,
+                                           @AuthenticationPrincipal User currentUser) {
+        if (id.equals(currentUser.getId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Cannot modify your own account");
+        }
+        User user = findUserOrThrow(id);
         try {
-            user.setRole(com.platform.educational.entity.enums.Role.valueOf(role));
+            user.setRole(Role.valueOf(role));
         } catch (IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid role: " + role);
         }
+        userRepository.save(user);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/users/{id}/approve-teacher")
+    public ResponseEntity<Void> approveTeacher(@PathVariable Long id,
+                                               @AuthenticationPrincipal User currentUser) {
+        if (id.equals(currentUser.getId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Cannot modify your own account");
+        }
+        User user = findUserOrThrow(id);
+        user.setRole(Role.TEACHER);
+        user.setRequestedTeacher(false);
+        userRepository.save(user);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/users/{id}/deny-teacher")
+    public ResponseEntity<Void> denyTeacher(@PathVariable Long id,
+                                            @AuthenticationPrincipal User currentUser) {
+        if (id.equals(currentUser.getId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Cannot modify your own account");
+        }
+        User user = findUserOrThrow(id);
+        user.setRequestedTeacher(false);
         userRepository.save(user);
         return ResponseEntity.ok().build();
     }
@@ -63,6 +97,11 @@ public class AdminController {
         return ResponseEntity.noContent().build();
     }
 
+    private User findUserOrThrow(Long id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+    }
+
     private UserResponse toDto(User u) {
         return UserResponse.builder()
                 .id(u.getId())
@@ -71,6 +110,7 @@ public class AdminController {
                 .role(u.getRole().name())
                 .active(u.isActive())
                 .createdAt(u.getCreatedAt() != null ? u.getCreatedAt().toString() : "")
+                .requestedTeacher(u.isRequestedTeacher())
                 .build();
     }
 }

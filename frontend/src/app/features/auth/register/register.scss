@@ -29,3 +29,31 @@
   text-align: center;
   font-size: 14px;
 }
+
+.teacher-request {
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin-bottom: 16px;
+  transition: border-color 0.2s, background 0.2s;
+
+  &.selected {
+    border-color: var(--mat-sys-primary);
+    background: var(--mat-sys-primary-container);
+  }
+}
+
+.teacher-request-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 500;
+  mat-icon { font-size: 18px; width: 18px; height: 18px; }
+}
+
+.teacher-request-hint {
+  margin: 8px 0 0 28px;
+  font-size: 13px;
+  color: var(--mat-sys-on-surface-variant);
+  line-height: 1.4;
+}

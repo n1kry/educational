@@ -15,7 +15,7 @@
     </p>
     <mat-chip class="cat-chip">{{ course.category }}</mat-chip>
 
-    <p class="description">{{ course.description }}</p>
+    <div class="description" [innerHTML]="course.description"></div>
 
     <mat-divider style="margin: 24px 0" />
 
@@ -97,11 +97,10 @@
         </div>
       </mat-card-content>
       <mat-card-actions>
-        @if (isStudent) {
+        @if (canEnroll) {
           @if (enrolled) {
             @if (completedAt) {
               <div class="completed-info">
-                <mat-icon>school</mat-icon>
                 <span>Завершён {{ formatDate(completedAt) }}</span>
               </div>
             }

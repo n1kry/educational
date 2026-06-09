@@ -8,6 +8,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
+import { QuillModule } from 'ngx-quill';
+import { QUILL_MODULES } from '../../../shared/quill-config';
 import { CourseService } from '../../../core/services/course.service';
 
 @Component({
@@ -16,7 +18,8 @@ import { CourseService } from '../../../core/services/course.service';
   imports: [
     ReactiveFormsModule, RouterLink,
     MatCardModule, MatFormFieldModule, MatInputModule,
-    MatButtonModule, MatIconModule, MatProgressSpinnerModule, MatSelectModule
+    MatButtonModule, MatIconModule, MatProgressSpinnerModule, MatSelectModule,
+    QuillModule
   ],
   templateUrl: './create-course.html',
   styleUrl: './create-course.scss'
@@ -26,6 +29,7 @@ export class CreateCourseComponent {
   loading = false;
 
   categories = ['Программирование', 'Дизайн', 'Бизнес', 'Математика', 'Языки', 'Другое'];
+  quillModules = QUILL_MODULES;
 
   constructor(
     private fb: FormBuilder,
@@ -36,7 +40,7 @@ export class CreateCourseComponent {
     this.form = this.fb.group({
       title:        ['', Validators.required],
       description:  [''],
-      category:     [''],
+      category:     ['', Validators.required],
       thumbnailUrl: ['']
     });
   }

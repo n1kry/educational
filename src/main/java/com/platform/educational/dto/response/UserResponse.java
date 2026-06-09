@@ -12,4 +12,5 @@ public class UserResponse {
     String role;
     boolean active;
     String createdAt;
+    boolean requestedTeacher;
 }

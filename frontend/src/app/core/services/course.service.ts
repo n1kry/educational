@@ -65,11 +65,17 @@ export class CourseService {
   createFinalQuiz(courseId: number, req: QuizRequest) { 
     return this.http.post<QuizResponse>(`${BASE}/courses/${courseId}/quiz/final`, req); 
   }
-  addQuestion(quizId: number, req: QuestionRequest) { 
-    return this.http.post<void>(`${BASE}/quizzes/${quizId}/questions`, req); 
+  updateQuiz(id: number, req: QuizRequest) {
+    return this.http.put<QuizResponse>(`${BASE}/quizzes/${id}`, req);
   }
-  deleteQuestion(questionId: number) { 
-    return this.http.delete<void>(`${BASE}/questions/${questionId}`); 
+  addQuestion(quizId: number, req: QuestionRequest) {
+    return this.http.post<void>(`${BASE}/quizzes/${quizId}/questions`, req);
+  }
+  updateQuestion(id: number, req: QuestionRequest) {
+    return this.http.put<void>(`${BASE}/questions/${id}`, req);
+  }
+  deleteQuestion(questionId: number) {
+    return this.http.delete<void>(`${BASE}/questions/${questionId}`);
   }
 
   enroll(courseId: number) { 

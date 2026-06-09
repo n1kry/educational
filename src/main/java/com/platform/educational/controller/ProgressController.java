@@ -17,14 +17,14 @@ public class ProgressController {
     private final ProgressService progressService;
 
     @GetMapping("/progress/{courseId}")
-    @PreAuthorize("hasRole('STUDENT')")
+    @PreAuthorize("isAuthenticated()")
     public ProgressResponse getCourseProgress(@PathVariable Long courseId,
                                               @AuthenticationPrincipal User user) {
         return progressService.getCourseProgress(courseId, user);
     }
 
     @PostMapping("/lessons/{lessonId}/complete")
-    @PreAuthorize("hasRole('STUDENT')")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Void> completeLesson(@PathVariable Long lessonId,
                                                @AuthenticationPrincipal User user) {
         progressService.completeLesson(lessonId, user);

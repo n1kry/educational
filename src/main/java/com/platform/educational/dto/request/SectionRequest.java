@@ -7,5 +7,6 @@ import lombok.Data;
 public class SectionRequest {
     @NotBlank
     private String title;
+    private String description;
     private int position;
 }

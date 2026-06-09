@@ -13,6 +13,7 @@ public class CourseDetailResponse {
     private String category;
     private String thumbnailUrl;
     private boolean published;
+    private Long teacherId;
     private String teacherName;
     private List<SectionResponse> sections;
     private QuizResponse finalQuiz;

@@ -1,4 +1,12 @@
-<h2>Управление пользователями</h2>
+<div class="users-header">
+  <h2>Управление пользователями</h2>
+  @if (pendingTeacherCount > 0) {
+    <div class="pending-badge">
+      <mat-icon>pending</mat-icon>
+      {{ pendingTeacherCount }} запрос{{ pendingTeacherCount > 1 ? 'а' : '' }} на роль преподавателя
+    </div>
+  }
+</div>
 
 @if (loading) {
   <div class="center"><mat-spinner /></div>
@@ -13,7 +21,12 @@
 
   <ng-container matColumnDef="name">
     <th mat-header-cell *matHeaderCellDef>Имя</th>
-    <td mat-cell *matCellDef="let u">{{ u.name }}</td>
+    <td mat-cell *matCellDef="let u">
+      {{ u.name }}
+      @if (isSelf(u)) {
+        <span class="self-label">вы</span>
+      }
+    </td>
   </ng-container>
 
   <ng-container matColumnDef="email">
@@ -24,11 +37,14 @@
   <ng-container matColumnDef="role">
     <th mat-header-cell *matHeaderCellDef>Роль</th>
     <td mat-cell *matCellDef="let u">
-      <mat-select [value]="u.role" (selectionChange)="changeRole(u, $event.value)" class="role-select">
+      <select class="role-select" [value]="u.role"
+              (change)="changeRole(u, $any($event.target).value)"
+              [disabled]="isSelf(u)"
+              [title]="isSelf(u) ? 'Нельзя изменить свою роль' : ''">
         @for (r of roles; track r) {
-          <mat-option [value]="r">{{ r }}</mat-option>
+          <option [value]="r" [selected]="u.role === r">{{ r }}</option>
         }
-      </mat-select>
+      </select>
     </td>
   </ng-container>
 
@@ -41,12 +57,33 @@
     </td>
   </ng-container>
 
+  <ng-container matColumnDef="teacher-request">
+    <th mat-header-cell *matHeaderCellDef>Запрос преподавателя</th>
+    <td mat-cell *matCellDef="let u">
+      @if (u.requestedTeacher) {
+        <div class="request-actions">
+          <button mat-flat-button class="approve-btn"
+                  matTooltip="Подтвердить роль преподавателя"
+                  (click)="approveTeacher(u)">
+            <mat-icon>check</mat-icon> Подтвердить
+          </button>
+          <button mat-icon-button color="warn"
+                  matTooltip="Отклонить запрос"
+                  (click)="denyTeacher(u)">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+      }
+    </td>
+  </ng-container>
+
   <ng-container matColumnDef="actions">
     <th mat-header-cell *matHeaderCellDef>Действия</th>
     <td mat-cell *matCellDef="let u">
       <button mat-icon-button
               [color]="u.active ? 'warn' : 'primary'"
-              [matTooltip]="u.active ? 'Заблокировать' : 'Активировать'"
+              [matTooltip]="isSelf(u) ? 'Нельзя изменить свой статус' : (u.active ? 'Заблокировать' : 'Активировать')"
+              [disabled]="isSelf(u)"
               (click)="toggleActive(u)">
         <mat-icon>{{ u.active ? 'block' : 'check_circle' }}</mat-icon>
       </button>
@@ -54,7 +91,7 @@
   </ng-container>
 
   <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-  <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+  <tr mat-row *matRowDef="let row; columns: displayedColumns;" [class.self-row]="isSelf(row)"></tr>
 </table>
 
 }

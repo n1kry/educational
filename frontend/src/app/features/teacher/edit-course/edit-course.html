@@ -4,7 +4,7 @@
 
 <div class="page-header">
   <button mat-icon-button routerLink="/teacher"><mat-icon>arrow_back</mat-icon></button>
-  <h2>{{ course.title }}</h2>
+  <h2 class="page-title" [matTooltip]="course.title" matTooltipShowDelay="600">{{ course.title }}</h2>
   <span class="spacer"></span>
   <button mat-stroked-button (click)="togglePublish()">
     <mat-icon>{{ course.published ? 'visibility_off' : 'visibility' }}</mat-icon>
@@ -20,11 +20,11 @@
         <mat-label>Название</mat-label>
         <input matInput formControlName="title">
       </mat-form-field>
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Описание</mat-label>
-        <textarea matInput formControlName="description" rows="3"></textarea>
-      </mat-form-field>
-      <div class="row-2">
+
+      <div class="editor-label">Описание курса</div>
+      <quill-editor formControlName="description" [modules]="quillModules" placeholder="Введите описание курса..." class="full-width editor-field"></quill-editor>
+
+      <div class="row-2" style="margin-top:16px">
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Категория</mat-label>
           <mat-select formControlName="category">
@@ -32,6 +32,9 @@
               <mat-option [value]="cat">{{ cat }}</mat-option>
             }
           </mat-select>
+          @if (courseForm.get('category')?.hasError('required') && courseForm.get('category')?.touched) {
+            <mat-error>Выберите категорию</mat-error>
+          }
         </mat-form-field>
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>URL обложки</mat-label>
@@ -59,6 +62,25 @@
             </mat-panel-description>
           </mat-expansion-panel-header>
 
+          @if (editingSection === section.id) {
+            <div class="inline-form edit-form" [formGroup]="editingSectionForm">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Название раздела</mat-label>
+                <input matInput formControlName="title">
+              </mat-form-field>
+              <div class="editor-label">Описание раздела</div>
+              <quill-editor formControlName="description" [modules]="quillModules" placeholder="Описание раздела..." class="editor-field"></quill-editor>
+              <mat-form-field appearance="outline" style="width:140px; margin-top:12px">
+                <mat-label>Позиция</mat-label>
+                <input matInput type="number" formControlName="position">
+              </mat-form-field>
+              <div class="actions">
+                <button mat-button (click)="editingSection = null">Отмена</button>
+                <button mat-flat-button (click)="saveSection()" [disabled]="editingSectionForm.invalid">Сохранить раздел</button>
+              </div>
+            </div>
+          }
+
           <div class="lessons-list">
             @for (lesson of section.lessons; track lesson.id) {
               <div class="lesson-row">
@@ -67,10 +89,43 @@
                 @if (lesson.durationMinutes) {
                   <span class="lesson-meta">{{ lesson.durationMinutes }} мин</span>
                 }
-                <button mat-icon-button color="warn" (click)="deleteLesson(lesson.id)">
+                <button mat-icon-button (click)="showEditLesson(lesson)" matTooltip="Редактировать">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button mat-icon-button color="warn" (click)="deleteLesson(lesson.id)" matTooltip="Удалить">
                   <mat-icon>delete</mat-icon>
                 </button>
               </div>
+
+              @if (editingLesson === lesson.id) {
+                <div class="inline-form edit-form" [formGroup]="editingLessonForm">
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Название урока</mat-label>
+                    <input matInput formControlName="title">
+                  </mat-form-field>
+                  <div class="editor-label">Описание урока</div>
+                  <quill-editor formControlName="description" [modules]="quillModules" placeholder="Описание урока..." class="editor-field"></quill-editor>
+                  <mat-form-field appearance="outline" class="full-width" style="margin-top:12px">
+                    <mat-label>YouTube URL</mat-label>
+                    <input matInput formControlName="videoUrl" placeholder="https://www.youtube.com/watch?v=...">
+                    <mat-icon matSuffix>smart_display</mat-icon>
+                  </mat-form-field>
+                  <div class="row-2">
+                    <mat-form-field appearance="outline" class="full-width">
+                      <mat-label>Длительность (мин)</mat-label>
+                      <input matInput type="number" formControlName="durationMinutes">
+                    </mat-form-field>
+                    <mat-form-field appearance="outline" class="full-width">
+                      <mat-label>Позиция</mat-label>
+                      <input matInput type="number" formControlName="position">
+                    </mat-form-field>
+                  </div>
+                  <div class="actions">
+                    <button mat-button (click)="editingLesson = null">Отмена</button>
+                    <button mat-flat-button (click)="saveLesson()" [disabled]="editingLessonForm.invalid">Сохранить урок</button>
+                  </div>
+                </div>
+              }
             }
           </div>
 
@@ -80,11 +135,9 @@
                 <mat-label>Название урока</mat-label>
                 <input matInput formControlName="title">
               </mat-form-field>
-              <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Описание</mat-label>
-                <textarea matInput formControlName="description" rows="2"></textarea>
-              </mat-form-field>
-              <mat-form-field appearance="outline" class="full-width">
+              <div class="editor-label">Описание урока</div>
+              <quill-editor formControlName="description" [modules]="quillModules" placeholder="Описание урока..." class="editor-field"></quill-editor>
+              <mat-form-field appearance="outline" class="full-width" style="margin-top:12px">
                 <mat-label>YouTube URL</mat-label>
                 <input matInput formControlName="videoUrl" placeholder="https://www.youtube.com/watch?v=...">
                 <mat-icon matSuffix>smart_display</mat-icon>
@@ -120,15 +173,69 @@
                 <mat-icon>quiz</mat-icon>
                 <strong>{{ section.quiz.title }}</strong>
                 <span class="lesson-meta">Проходной балл: {{ section.quiz.passingScore }}%</span>
+                <button mat-icon-button (click)="showEditQuiz(section.quiz)" matTooltip="Редактировать тест">
+                  <mat-icon>edit</mat-icon>
+                </button>
               </div>
+
+              @if (editingQuiz === section.quiz.id) {
+                <div class="inline-form edit-form" [formGroup]="editingQuizForm">
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Название теста</mat-label>
+                    <input matInput formControlName="title">
+                  </mat-form-field>
+                  <mat-form-field appearance="outline" style="width:180px">
+                    <mat-label>Проходной балл (%)</mat-label>
+                    <input matInput type="number" formControlName="passingScore">
+                  </mat-form-field>
+                  <div class="actions">
+                    <button mat-button (click)="editingQuiz = null">Отмена</button>
+                    <button mat-flat-button (click)="saveQuiz()" [disabled]="editingQuizForm.invalid">Сохранить тест</button>
+                  </div>
+                </div>
+              }
 
               @for (q of section.quiz.questions; track q.id) {
                 <div class="question-row">
                   <span>{{ q.text }}</span>
-                  <button mat-icon-button color="warn" (click)="deleteQuestion(q.id)">
+                  <button mat-icon-button (click)="showEditQuestion(q)" matTooltip="Редактировать вопрос">
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                  <button mat-icon-button color="warn" (click)="deleteQuestion(q.id)" matTooltip="Удалить вопрос">
                     <mat-icon>delete</mat-icon>
                   </button>
                 </div>
+
+                @if (editingQuestion === q.id) {
+                  <div class="inline-form edit-form" [formGroup]="editingQuestionForm">
+                    <mat-form-field appearance="outline" class="full-width">
+                      <mat-label>Вопрос</mat-label>
+                      <textarea matInput formControlName="text" rows="2"></textarea>
+                    </mat-form-field>
+                    @for (ctrl of getEditingOptionControls(); track $index) {
+                      <div [formGroup]="$any(ctrl)" class="option-row">
+                        <span class="option-key">{{ ['A','B','C','D'][$index] }}</span>
+                        <mat-form-field appearance="outline" class="full-width">
+                          <mat-label>Вариант {{ ['A','B','C','D'][$index] }}</mat-label>
+                          <input matInput formControlName="text">
+                        </mat-form-field>
+                      </div>
+                    }
+                    <mat-form-field appearance="outline">
+                      <mat-label>Правильный ответ</mat-label>
+                      <mat-select formControlName="correctAnswer">
+                        <mat-option value="A">A</mat-option>
+                        <mat-option value="B">B</mat-option>
+                        <mat-option value="C">C</mat-option>
+                        <mat-option value="D">D</mat-option>
+                      </mat-select>
+                    </mat-form-field>
+                    <div class="actions">
+                      <button mat-button (click)="editingQuestion = null">Отмена</button>
+                      <button mat-flat-button (click)="saveQuestion()" [disabled]="editingQuestionForm.invalid">Сохранить вопрос</button>
+                    </div>
+                  </div>
+                }
               }
 
               @if (addingQuestionForQuiz === section.quiz.id) {
@@ -137,7 +244,6 @@
                     <mat-label>Вопрос</mat-label>
                     <textarea matInput formControlName="text" rows="2"></textarea>
                   </mat-form-field>
-
                   @for (ctrl of getOptionControls(); track $index) {
                     <div [formGroup]="$any(ctrl)" class="option-row">
                       <span class="option-key">{{ ['A','B','C','D'][$index] }}</span>
@@ -147,7 +253,6 @@
                       </mat-form-field>
                     </div>
                   }
-
                   <mat-form-field appearance="outline">
                     <mat-label>Правильный ответ</mat-label>
                     <mat-select formControlName="correctAnswer">
@@ -157,7 +262,6 @@
                       <mat-option value="D">D</mat-option>
                     </mat-select>
                   </mat-form-field>
-
                   <div class="actions">
                     <button mat-button (click)="addingQuestionForQuiz = null">Отмена</button>
                     <button mat-flat-button (click)="addQuestion(section.quiz!.id)" [disabled]="questionForm.invalid">
@@ -171,6 +275,7 @@
                 </button>
               }
             </div>
+
           } @else if (addingQuizForSection === section.id) {
             <div class="inline-form" [formGroup]="quizForm">
               <mat-form-field appearance="outline" class="full-width">
@@ -195,6 +300,9 @@
           }
 
           <div class="panel-actions">
+            <button mat-button (click)="showEditSection(section)">
+              <mat-icon>edit</mat-icon> Редактировать раздел
+            </button>
             <button mat-button color="warn" (click)="deleteSection(section.id)">
               <mat-icon>delete</mat-icon> Удалить раздел
             </button>
@@ -205,14 +313,19 @@
 
     <mat-divider style="margin: 16px 0" />
 
-    <div class="add-section" [formGroup]="sectionForm">
-      <mat-form-field appearance="outline">
+    <div class="add-section-wrap" [formGroup]="sectionForm">
+      <h4 class="add-section-title">Добавить раздел</h4>
+      <mat-form-field appearance="outline" class="full-width">
         <mat-label>Название нового раздела</mat-label>
         <input matInput formControlName="title">
       </mat-form-field>
-      <button mat-flat-button (click)="addSection()" [disabled]="sectionForm.invalid">
-        <mat-icon>add</mat-icon> Добавить раздел
-      </button>
+      <div class="editor-label">Описание раздела (необязательно)</div>
+      <quill-editor formControlName="description" [modules]="quillModules" placeholder="Описание раздела..." class="editor-field"></quill-editor>
+      <div class="actions" style="margin-top:12px">
+        <button mat-flat-button (click)="addSection()" [disabled]="sectionForm.invalid">
+          <mat-icon>add</mat-icon> Добавить раздел
+        </button>
+      </div>
     </div>
 
   </mat-card-content>

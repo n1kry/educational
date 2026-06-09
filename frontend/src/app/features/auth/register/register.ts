@@ -6,6 +6,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatIconModule } from '@angular/material/icon';
 import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
@@ -14,7 +16,8 @@ import { AuthService } from '../../../core/services/auth.service';
   imports: [
     ReactiveFormsModule, RouterLink,
     MatCardModule, MatFormFieldModule, MatInputModule,
-    MatButtonModule, MatProgressSpinnerModule
+    MatButtonModule, MatProgressSpinnerModule,
+    MatCheckboxModule, MatIconModule
   ],
   templateUrl: './register.html',
   styleUrl: './register.scss'
@@ -33,7 +36,8 @@ export class RegisterComponent {
     this.form = this.fb.group({
       name: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(6)]]
+      password: ['', [Validators.required, Validators.minLength(6)]],
+      requestedTeacher: [false]
     });
   }
 

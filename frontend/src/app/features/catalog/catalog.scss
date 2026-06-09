@@ -26,8 +26,33 @@
 .course-card {
   cursor: pointer;
   transition: box-shadow 0.2s;
+  display: flex !important;
+  flex-direction: column !important;
 
   &:hover { box-shadow: 0 4px 20px rgba(0,0,0,.15); }
+
+  ::ng-deep .mat-mdc-card-header { min-width: 0; overflow: hidden; }
+  ::ng-deep .mat-mdc-card-header-text { min-width: 0; overflow: hidden; }
+  ::ng-deep .mat-mdc-card-subtitle { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+}
+
+.card-body {
+  flex: 1;
+}
+
+.card-footer {
+  margin-top: auto;
+
+  mat-card-actions {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center;
+  }
+}
+
+.enrolled-btn {
+  opacity: 0.7;
+  mat-icon { font-size: 16px; width: 16px; height: 16px; vertical-align: middle; margin-right: 2px; }
 }
 
 .thumb {
@@ -60,6 +85,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
+  padding: 0 16px 8px;
 }
 
 .sections {

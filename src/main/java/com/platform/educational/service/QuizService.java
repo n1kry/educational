@@ -84,6 +84,34 @@ public class QuizService {
     }
 
     @Transactional
+    public Quiz updateQuiz(Long quizId, QuizRequest req, User teacher) {
+        Quiz quiz = findQuizOrThrow(quizId);
+        checkQuizOwnership(quiz, teacher);
+        quiz.setTitle(req.getTitle());
+        quiz.setPassingScore(req.getPassingScore());
+        return quizRepository.save(quiz);
+    }
+
+    @Transactional
+    public void updateQuestion(Long questionId, QuestionRequest req, User teacher) {
+        Question question = questionRepository.findById(questionId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Question not found"));
+        checkQuizOwnership(question.getQuiz(), teacher);
+        question.setText(req.getText());
+        question.setCorrectAnswer(req.getCorrectAnswer());
+        question.getOptions().clear();
+        questionRepository.saveAndFlush(question);
+        req.getOptions().forEach(o -> question.getOptions().add(
+                AnswerOption.builder()
+                        .question(question)
+                        .optionKey(o.getOptionKey())
+                        .text(o.getText())
+                        .build()
+        ));
+        questionRepository.save(question);
+    }
+
+    @Transactional
     public void deleteQuestion(Long questionId, User teacher) {
         Question question = questionRepository.findById(questionId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Question not found"));

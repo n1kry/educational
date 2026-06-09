@@ -21,7 +21,7 @@
           <img mat-card-image [src]="course.thumbnailUrl" [alt]="course.title">
         }
         <mat-card-header>
-          <mat-card-title>{{ course.title }}</mat-card-title>
+          <mat-card-title><span class="title-clamp" [matTooltip]="course.title" matTooltipShowDelay="600">{{ course.title }}</span></mat-card-title>
           <mat-card-subtitle>
             {{ course.sectionCount }} разделов ·
             <mat-chip [class]="course.published ? 'chip-published' : 'chip-draft'">
@@ -31,7 +31,7 @@
         </mat-card-header>
 
         <mat-card-content>
-          <p class="description">{{ course.description }}</p>
+          <p class="description">{{ plainText(course.description) | slice:0:160 }}{{ plainText(course.description).length > 160 ? '…' : '' }}</p>
         </mat-card-content>
 
         <mat-card-actions>
@@ -42,8 +42,8 @@
             <mat-icon>{{ course.published ? 'visibility_off' : 'visibility' }}</mat-icon>
             {{ course.published ? 'Снять' : 'Опубликовать' }}
           </button>
-          <button mat-button color="warn" (click)="deleteCourse(course.id)">
-            <mat-icon>delete</mat-icon>
+          <button mat-icon-button class="delete-btn" (click)="deleteCourse(course.id)">
+            <mat-icon style="color: var(--mat-sys-error)">delete</mat-icon>
           </button>
         </mat-card-actions>
       </mat-card>

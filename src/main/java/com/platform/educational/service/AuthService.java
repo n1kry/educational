@@ -33,12 +33,13 @@ public class AuthService {
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role(Role.STUDENT)
                 .active(true)
+                .requestedTeacher(request.isRequestedTeacher())
                 .build();
 
         userRepository.save(user);
 
         String token = jwtUtil.generateToken(user);
-        return new AuthResponse(token, user.getName(), user.getEmail(), user.getRole().name());
+        return new AuthResponse(user.getId(), token, user.getName(), user.getEmail(), user.getRole().name());
     }
 
     public AuthResponse login(LoginRequest request) {
@@ -50,6 +51,6 @@ public class AuthService {
                 .orElseThrow();
 
         String token = jwtUtil.generateToken(user);
-        return new AuthResponse(token, user.getName(), user.getEmail(), user.getRole().name());
+        return new AuthResponse(user.getId(), token, user.getName(), user.getEmail(), user.getRole().name());
     }
 }
