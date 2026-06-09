@@ -1,5 +1,13 @@
 h2 { margin-bottom: 24px; }
 .center { display: flex; justify-content: center; padding: 64px; }
-.courses-table { width: 100%; }
+.courses-table {
+  width: 100%;
+  .mat-column-title {
+    max-width: 260px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
 .chip-pub { background: #e8f5e9 !important; color: #2e7d32 !important; }
 .chip-draft { background: #fff3e0 !important; color: #e65100 !important; }

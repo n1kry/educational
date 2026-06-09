@@ -24,6 +24,7 @@ public class ProgressService {
     private final SectionRepository sectionRepository;
     private final QuizRepository quizRepository;
     private final EnrollmentRepository enrollmentRepository;
+    private final CourseRepository courseRepository;
 
     public ProgressResponse getCourseProgress(Long courseId, User student) {
         List<Long> completedLessonIds = lessonProgressRepository
@@ -105,10 +106,12 @@ public class ProgressService {
 
         int percent = (int) Math.min(100, ((completedLessons + passedQuizzes * 2) * 100.0 / totalWeight));
 
-        Course course = new Course(); course.setId(courseId);
         CourseProgress cp = courseProgressRepository
                 .findByStudentIdAndCourseId(student.getId(), courseId)
-                .orElse(CourseProgress.builder().student(student).course(course).build());
+                .orElse(CourseProgress.builder()
+                        .student(student)
+                        .course(courseRepository.getReferenceById(courseId))
+                        .build());
         cp.setProgressPercent(percent);
         if (percent == 100 && cp.getCompletedAt() == null) {
             cp.setCompletedAt(LocalDateTime.now());

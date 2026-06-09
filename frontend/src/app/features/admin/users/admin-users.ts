@@ -7,7 +7,6 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatBadgeModule } from '@angular/material/badge';
-import { FormsModule } from '@angular/forms';
 import { AdminService } from '../../../core/services/admin.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { UserResponse } from '../../../core/models/course.model';
@@ -16,7 +15,6 @@ import { UserResponse } from '../../../core/models/course.model';
   selector: 'app-admin-users',
   standalone: true,
   imports: [
-    FormsModule,
     MatTableModule, MatButtonModule, MatIconModule, MatChipsModule,
     MatProgressSpinnerModule, MatSnackBarModule,
     MatTooltipModule, MatBadgeModule
